@@ -13,7 +13,7 @@ object CovextHullDemo extends App {
   val line = Line(Point(143,995), Point(950, 991))
   val point = Point(446, 988)
 
-  println(s"pointsBelowLine:${line.pointsBelowLine(Set(point))}")
-  println(s"pointsAboveLine:${line.pointsAboveLine(Set(point))}")
-  println(s"pointsOnLIne:${line.pointsOnLIne(Set(point))}")
+  println(s"pointsBelowLine:${Line.pointsBelowLine(line, Set(point))}")
+  println(s"pointsAboveLine:${Line.pointsAboveLine(line, Set(point))}")
+  println(s"pointsOnLIne:${Line.pointsOnLIne(line, Set(point))}")
 }

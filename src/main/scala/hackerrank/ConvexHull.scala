@@ -8,7 +8,7 @@ object ConvexHull {
 
   def main(args: Array[String]): Unit = {
 
-    val input = ConvexHullInputs.testManual
+    val input = ConvexHullInputs.test2
 
     printPerimeter(input)
   }
@@ -26,20 +26,40 @@ object ConvexHull {
   }
 
   def calcPerimeter(input: String): Double =  {
-    val p = calcConvexHull(inputToPoints(input)).perimeter
-    val v = BigDecimal(p).setScale(1, BigDecimal.RoundingMode.HALF_UP).toDouble
-    v
+    val perimeter = calcConvexHull(inputToPoints(input)).perimeter
+    BigDecimal(perimeter)
+      .setScale(1, BigDecimal.RoundingMode.HALF_UP)
+      .toDouble
   }
 
   def printPerimeter(input: String): Unit = {
-    println(f"${calcPerimeter(input)}%1.1f")
-  }
-
-  object Point {
-    def apply(x: Int, y: Int): Point = Point(x.toDouble, y.toDouble)
+    println(s"${calcPerimeter(input)}")
+//    println(f"${calcPerimeter(input)}%1.1f")
   }
 
   case class Point(x: Double, y: Double)
+
+  object Line {
+
+    def pointsAboveLine(line: Line, points: Set[Point]): Set[Point] =
+      points
+        .filter{ point =>
+          point.y > (line.slope * point.x) + line.yIntercept
+        }
+
+    def pointsBelowLine(line: Line, points: Set[Point]): Set[Point] =
+      points
+        .filter{ point =>
+          point.y < (line.slope * point.x) +line. yIntercept
+        }
+
+    def pointsOnLIne(line: Line, points: Set[Point]): Set[Point] =
+      points
+        .filter{ point =>
+          point.y == (line.slope * point.x) + line.yIntercept
+        }
+
+  }
 
   case class Line(p0: Point, p1: Point) {
     def slope: Double =
@@ -51,36 +71,16 @@ object ConvexHull {
     def length: Double =
       sqrt(pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2))
 
-    def pointFurthestFromLine(points: Set[Point]): Point = {
-//      println(s"pointFurthestFromLine -- size=${points.size}")
+    def pointFurthestFromLine(points: Set[Point]): Point =
       points
         .map{ point =>
           val a = Triangle.altitude(this, point)
           (point, a)
         }.maxBy(_._2)
         ._1
-    }
-
-    def pointsAboveLine(points: Set[Point]): Set[Point] =
-      points
-        .filter{ point =>
-          point.y > (slope * point.x) + yIntercept
-        }
-
-    def pointsBelowLine(points: Set[Point]): Set[Point] =
-      points
-        .filter{ point =>
-          point.y < (slope * point.x) + yIntercept
-        }
-
-    def pointsOnLIne(points: Set[Point]): Set[Point] =
-      points
-        .filter{ point =>
-          point.y == (slope * point.x) + yIntercept
-        }
 
     def isPointOnLine(point: Point): Boolean =
-      pointsOnLIne(Set(point)).nonEmpty
+      Line.pointsOnLIne(this, Set(point)).nonEmpty
 
   }
 
@@ -105,7 +105,7 @@ object ConvexHull {
 
   case class Triangle(p0: Point, p1: Point, p2: Point) {
 
-    def areaBd(d: Double) = BigDecimal(d).setScale(4, RoundingMode.HALF_UP).toDouble
+    def areaBd(d: Double): Double = BigDecimal(d).setScale(4, RoundingMode.HALF_UP).toDouble
 
     lazy val area: Double = areaBd(Triangle.area(p0, p1, p2))
 
@@ -113,8 +113,6 @@ object ConvexHull {
       val area0 = Triangle(p0, p1, point).area
       val area1 = Triangle(p1, p2, point).area
       val area2 = Triangle(p2, p0, point).area
-//      println(s"isPointInside -- p0=${p0}, p1=${p1}, point=${point}")
-//      println(s"isPointInside -- area0=${area0}, area1=${area1}, area2=${area2} ... area=${area}")
       val areaMatch = area == (area0 + area1 + area2)
       areaMatch && !points.contains(point)
     }
@@ -160,6 +158,41 @@ object ConvexHull {
 
   }
 
+  def resolvePerimeterPoints(line: Line, allPoints: Set[Point]): Set[Point] = {
+
+    def r(line: Line, aboveBelowFn: (Line, Set[Point]) => Set[Point], remainingPoints: Set[Point], result: Set[Point]): Set[Point] = {
+      val points = aboveBelowFn(line, remainingPoints)
+      if ( points.isEmpty) {
+        result
+      } else {
+        val furthestPoint = line.pointFurthestFromLine(points)
+        val triangle = Triangle(line.p0, line.p1, furthestPoint)
+        val nextRemainingPoints = {
+          points
+            .filterNot { point =>
+              triangle.isPointInside(point) || triangle.points.contains(point)
+            }
+        }
+        val testOutput =
+        //            s"""resolvePerimeterPoints -- ${if (isAbove) "above" else "below"}
+          s"""resolvePerimeterPoints -- }
+             |remainingPoints=${remainingPoints}
+             |line=${line}
+             |furthestPoint=${furthestPoint}
+             |triangle=${triangle}
+             |nextRemainingPoints=${nextRemainingPoints}
+             |""".stripMargin
+        println(testOutput)
+        r(Line(line.p0, furthestPoint), aboveBelowFn, nextRemainingPoints, result ++ triangle.points)++
+          r(Line(line.p1, furthestPoint), aboveBelowFn, nextRemainingPoints, result ++ triangle.points)
+      }
+    }
+
+
+    r(line, Line.pointsAboveLine, allPoints, Set()) ++
+      r(line, Line.pointsBelowLine, allPoints, Set())
+  }
+
   def calcConvexHull(allPoints: Set[Point]): ConvexHull = {
     val minXCoord = allPoints.map(_.x).min
     val maxXCoord = allPoints.map(_.x).max
@@ -173,55 +206,6 @@ object ConvexHull {
       allPoints
         .filter(_.x == minXCoord)
         .minBy(_.y)
-
-
-    def resolvePerimeterPoints(line: Line, allPoints: Set[Point]): Set[Point] = {
-
-      def resolveRemainingPoints(line: Line, isAbove: Boolean, points: Set[Point]): Set[Point] =
-        if ( isAbove ) {
-          line.pointsAboveLine(points)
-        } else {
-          line.pointsBelowLine(points)
-        }
-
-
-      def r(line: Line, isAbove: Boolean, remainingPoints: Set[Point], result: Set[Point]): Set[Point] = {
-        val points = resolveRemainingPoints(line, isAbove, remainingPoints)
-        if ( points.isEmpty) {
-          result
-        } else {
-          val furthestPoint = line.pointFurthestFromLine(points)
-          val triangle = Triangle(line.p0, line.p1, furthestPoint)
-          val nextRemainingPoints = {
-            points
-            .filterNot { point =>
-              triangle.isPointInside(point) || triangle.points.contains(point)
-            }
-          }
-          val testOutput =
-            s"""resolvePerimeterPoints -- ${if (isAbove) "above" else "below"}
-               |remainingPoints=${remainingPoints}
-               |line=${line}
-               |furthestPoint=${furthestPoint}
-               |triangle=${triangle}
-               |nextRemainingPoints=${nextRemainingPoints}
-               |""".stripMargin
-          println(testOutput)
-          r(Line(line.p0, furthestPoint), isAbove, nextRemainingPoints, result ++ triangle.points)++
-          r(Line(line.p1, furthestPoint), isAbove, nextRemainingPoints, result ++ triangle.points)
-        }
-      }
-
-      val pointsAbove = line.pointsAboveLine(allPoints)
-      val pointsBelow = line.pointsBelowLine(allPoints)
-
-      println(s"resolvePerimeterPoints -- initialLine:${line}")
-      println(s"resolvePerimeterPoints -- pointsAbove:${pointsAbove}")
-      println(s"resolvePerimeterPoints -- pointsBelow:${pointsBelow}\n---------------------------")
-
-      r(line, isAbove = true, pointsAbove, Set()) ++
-      r(line, isAbove = false, pointsBelow, Set())
-    }
 
     ConvexHull(
       resolvePerimeterPoints(
