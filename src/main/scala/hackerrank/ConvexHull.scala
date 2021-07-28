@@ -1,6 +1,5 @@
 package hackerrank
 
-import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 import scala.math._
 
@@ -32,10 +31,8 @@ object ConvexHull {
       .toDouble
   }
 
-  def printPerimeter(input: String): Unit = {
+  def printPerimeter(input: String): Unit = 
     println(s"${calcPerimeter(input)}")
-//    println(f"${calcPerimeter(input)}%1.1f")
-  }
 
   case class Point(x: Double, y: Double)
 
