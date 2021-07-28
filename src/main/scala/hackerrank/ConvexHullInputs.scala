@@ -2,6 +2,16 @@ package hackerrank
 
 object ConvexHullInputs {
 
+  val testManual =
+    """7
+      |0 2
+      |1 2
+      |2 4
+      |3 3
+      |2 2
+      |3 1
+      |1 1""".stripMargin
+
   val test0 =
     """6
       |1 1
@@ -117,4 +127,20 @@ object ConvexHullInputs {
                 |368 630
                 |776 791
                 |560 249""".stripMargin
+
+  val test2_0 =
+    """13
+      |950 991
+      |992 351
+      |977 285
+      |917 26
+      |224 13
+      |167 39
+      |68 80
+      |5 341
+      |8 555
+      |20 604
+      |29 682
+      |143 995
+      |446 988""".stripMargin
 }
