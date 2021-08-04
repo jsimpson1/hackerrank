@@ -1,7 +1,7 @@
-package hackerrank
+package hackerrank.recursion
 
 import scala.math.BigDecimal.RoundingMode
-import scala.math._
+import scala.math.{BigDecimal, pow, sqrt}
 
 object ConvexHull {
 
@@ -24,14 +24,14 @@ object ConvexHull {
       .toSet
   }
 
-  def calcPerimeter(input: String): Double =  {
+  def calcPerimeter(input: String): Double = {
     val perimeter = calcConvexHull(inputToPoints(input)).perimeter
     BigDecimal(perimeter)
       .setScale(1, BigDecimal.RoundingMode.HALF_UP)
       .toDouble
   }
 
-  def printPerimeter(input: String): Unit = 
+  def printPerimeter(input: String): Unit =
     println(s"${calcPerimeter(input)}")
 
   case class Point(x: Double, y: Double)
@@ -40,19 +40,19 @@ object ConvexHull {
 
     def pointsAboveLine(line: Line, points: Set[Point]): Set[Point] =
       points
-        .filter{ point =>
+        .filter { point =>
           point.y > (line.slope * point.x) + line.yIntercept
         }
 
     def pointsBelowLine(line: Line, points: Set[Point]): Set[Point] =
       points
-        .filter{ point =>
-          point.y < (line.slope * point.x) +line. yIntercept
+        .filter { point =>
+          point.y < (line.slope * point.x) + line.yIntercept
         }
 
     def pointsOnLIne(line: Line, points: Set[Point]): Set[Point] =
       points
-        .filter{ point =>
+        .filter { point =>
           point.y == (line.slope * point.x) + line.yIntercept
         }
 
@@ -60,7 +60,7 @@ object ConvexHull {
 
   case class Line(p0: Point, p1: Point) {
     def slope: Double =
-      (p1.y - p0.y)/(p1.x - p0.x)
+      (p1.y - p0.y) / (p1.x - p0.x)
 
     def yIntercept: Double =
       p1.y - (slope * p1.x)
@@ -70,7 +70,7 @@ object ConvexHull {
 
     def pointFurthestFromLine(points: Set[Point]): Point =
       points
-        .map{ point =>
+        .map { point =>
           val a = Triangle.altitude(this, point)
           (point, a)
         }.maxBy(_._2)
@@ -96,7 +96,7 @@ object ConvexHull {
       val a = Line(p0, p1).length
       val b = Line(p1, p2).length
       val c = Line(p2, p0).length
-      0.25 * sqrt((a + b + c)*(-a + b + c)*(a - b + c)*(a + b -c))
+      0.25 * sqrt((a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c))
     }
   }
 
@@ -129,7 +129,7 @@ object ConvexHull {
     def sortPointsClockwise: List[Point] = {
       points
         .toList
-        .sortWith{ (a, b) =>
+        .sortWith { (a, b) =>
           val a1: Double = (Math.toDegrees(Math.atan2(a.x - centroid.x, a.y - centroid.y)) + 360) % 360;
           val a2: Double = (Math.toDegrees(Math.atan2(b.x - centroid.x, b.y - centroid.y)) + 360) % 360;
           a1 < a2
@@ -139,17 +139,19 @@ object ConvexHull {
     def perimeter: Double = {
       val sortedPoints = sortPointsClockwise
       val firstPoint = sortedPoints.head
+
       def r(points: List[Point], result: Double): Double = {
         points match {
           case Nil => result
           case List(p0) =>
             val p = Line(p0, firstPoint).length
-            r(points.tail, result +  p)
+            r(points.tail, result + p)
           case l =>
             val p = Line(l.head, l.tail.head).length
-            r(points.tail, result +  p)
+            r(points.tail, result + p)
         }
       }
+
       r(sortedPoints, 0.0)
     }
 
@@ -159,7 +161,7 @@ object ConvexHull {
 
     def r(line: Line, aboveBelowFn: (Line, Set[Point]) => Set[Point], remainingPoints: Set[Point], result: Set[Point]): Set[Point] = {
       val points = aboveBelowFn(line, remainingPoints)
-      if ( points.isEmpty) {
+      if (points.isEmpty) {
         result
       } else {
         val furthestPoint = line.pointFurthestFromLine(points)
@@ -180,7 +182,7 @@ object ConvexHull {
              |nextRemainingPoints=${nextRemainingPoints}
              |""".stripMargin
         println(testOutput)
-        r(Line(line.p0, furthestPoint), aboveBelowFn, nextRemainingPoints, result ++ triangle.points)++
+        r(Line(line.p0, furthestPoint), aboveBelowFn, nextRemainingPoints, result ++ triangle.points) ++
           r(Line(line.p1, furthestPoint), aboveBelowFn, nextRemainingPoints, result ++ triangle.points)
       }
     }
