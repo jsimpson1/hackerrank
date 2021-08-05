@@ -20,9 +20,9 @@ class BubbleSortTest extends AnyFunSuite {
 
   test("a few sorts") {
     val input = List(5,4,2,3,1)
-    val actual = BubbleSort.bubbleSort(input)
+    val actual: List[Int] = BubbleSort.bubbleSort(input)
     println("---------------------")
-    assertResult((List(1,2,3,4,5))(actual)
+    assertResult(List(1,2,3,4,5))(actual)
   }
 
 
