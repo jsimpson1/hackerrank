@@ -48,6 +48,29 @@ object Crossword101Inputs {
                   |+++++A++++
                   |++++++++++""".stripMargin
 
+  val test3 = """+-++++++++
+                |+-++-+++++
+                |+-------++
+                |+-++-++-++
+                |+-++-++-++
+                |+-++-++-++
+                |++++-++-++
+                |+--------+
+                |++++++++++
+                |----------
+                |CALIFORNIA;LASVEGAS;NIGERIA;CANADA;TELAVIV;ALASKA""".stripMargin
+
+  val result3 = """+C++++++++
+                  |+A++T+++++
+                  |+NIGERIA++
+                  |+A++L++L++
+                  |+D++A++A++
+                  |+A++V++S++
+                  |++++I++K++
+                  |+LASVEGAS+
+                  |++++++++++
+                  |CALIFORNIA""".stripMargin
+
   val test0MostlyFull = """+L++++++++
                |+O++++++++
                |+N++++++++

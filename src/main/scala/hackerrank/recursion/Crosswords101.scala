@@ -8,13 +8,13 @@ object Crosswords101 {
   import model._
 
   def main(args: Array[String]): Unit = {
-    val input = Crossword101Inputs.test0
+    val input = Crossword101Inputs.test3
 
     println("input:")
-    val c = parseInput(input)
-    c.display
+    val crossword = parseInput(input)
     println("output:")
-    printSolvedCrossword(c)
+    println(solveCrossword(crossword).toString)
+//    printSolvedCrossword(crossword)
   }
 
   object model {
@@ -80,8 +80,11 @@ object Crosswords101 {
 
     case class Letter(value: Char, coordinate: Coordinate) extends CrosswordSquare
 
-    case class Word(value: String) {
+    case class Word(value: String) extends Ordered[Word]{
       def length: Int = value.length
+
+      override def compare(that: Word): Int =
+        value.compareTo(that.value)
     }
 
     case class CrosswordLine(squares: List[CrosswordSquare]) extends Ordered[CrosswordLine]{
@@ -93,6 +96,39 @@ object Crosswords101 {
       lazy val rowIndexToSquares: Map[Int, List[CrosswordSquare]] =
         squares
           .groupBy(_.coordinate.rowIndex)
+
+      lazy val allWordOpenings: List[CrosswordLine] = {
+        @tailrec
+        def resolvedOpenLines(
+          squares: List[CrosswordSquare],
+          sequentialSquare: List[CrosswordSquare],
+          result: List[CrosswordLine]
+        ): List[CrosswordLine] = {
+          squares
+            .headOption match {
+            case None =>
+              if ( sequentialSquare.nonEmpty ){
+                result :+ CrosswordLine(sequentialSquare)
+              } else {
+                result
+              }
+
+            case Some(nextSquare) =>
+              if (!nextSquare.isClosed) {
+                val nextSequentialSquare = nextSquare :: sequentialSquare
+                resolvedOpenLines(squares.tail, nextSequentialSquare, result)
+              } else {
+                if (sequentialSquare.isEmpty) {
+                  resolvedOpenLines(squares.tail, Nil, result)
+                } else {
+                  val opening = CrosswordLine(sequentialSquare)
+                  resolvedOpenLines(squares.tail, Nil, result.::(opening))
+                }
+              }
+          }
+        }
+        resolvedOpenLines(squares, Nil, Nil)
+      }
 
       override def compare(that: CrosswordLine): Int = {
         squares
@@ -162,41 +198,6 @@ object Crosswords101 {
 
       def length: Int = squares.length
 
-      lazy val allWordOpenings: List[CrosswordLine] = {
-        @tailrec
-        def resolvedOpenLines(
-          squares: List[CrosswordSquare],
-          sequentialSquare: List[CrosswordSquare],
-          result: List[CrosswordLine]
-        ): List[CrosswordLine] = {
-          squares
-            .headOption match {
-            case None =>
-              if ( sequentialSquare.nonEmpty ){
-                result :+ CrosswordLine(sequentialSquare)
-              } else {
-                result
-              }
-
-            case Some(nextSquare) =>
-              if (!nextSquare.isClosed) {
-                val nextSequentialSquare = nextSquare :: sequentialSquare
-                resolvedOpenLines(squares.tail, nextSequentialSquare, result)
-              } else {
-                if (sequentialSquare.isEmpty) {
-                  resolvedOpenLines(squares.tail, Nil, result)
-                } else {
-                  val opening = CrosswordLine(sequentialSquare)
-                  resolvedOpenLines(squares.tail, Nil, result.::(opening))
-                }
-              }
-          }
-        }
-
-        resolvedOpenLines(squares, Nil, Nil)
-      }
-
-
     }
 
     case class PlaceWordResult(remainingWord: Option[Word], crossword: Crossword)
@@ -209,6 +210,7 @@ object Crosswords101 {
            case Nil =>
              this
            case word :: remainder =>
+
              placeWord(word)match {
                case PlaceWordResult(unplacedWOrd, crossword) =>
                  if ( crossword.isCrosswordComplete ) {
@@ -354,43 +356,50 @@ object Crosswords101 {
 
   def parseInput(input: String): Crossword = {
     val lines = input.lines.toList
-    val words = lines(10).split(";").toList.map(Word)
-    val c = Crossword(
-      words,
-      List
-        .range(0, 10)
-        .flatMap { rowIndex =>
-          lines(rowIndex)
-            .zipWithIndex
-            .map { c =>
-              CrosswordSquare
-                .parse(c._1, Coordinate(rowIndex, c._2))
-            }
-            .toList
-        }
-    )
-    c
+    try {
+      val words = lines(10).split(";").toList.map(Word)
+      Crossword(
+        words,
+        List
+          .range(0, 10)
+          .flatMap { rowIndex =>
+            lines(rowIndex)
+              .zipWithIndex
+              .map { c =>
+                CrosswordSquare
+                  .parse(c._1, Coordinate(rowIndex, c._2))
+              }
+              .toList
+          }
+      )
+    } catch {
+      case e: Exception =>
+        println(s"parseInput -- error parsing lines=${lines}\n${e.getMessage}")
+        throw e
+    }
   }
 
   def printSolvedCrossword(c: Crossword): Unit =
     println(solveCrossword(c))
 
   def sortWordsByLength(words: List[Word]): List[Word] = {
-    val wordLengthToWOrds: List[(Int, List[Word])] =
+    val wordLengthToWords: List[(Int, List[Word])] =
       words
         .groupBy(_.length)
         .toList
-        .sortBy(v => v._2.size)
+        .sortBy(v => v._1)
 
     val wordsOfDistinctSize: List[Word] =
-      wordLengthToWOrds
+      wordLengthToWords
         .filter(_._2.size == 1)
         .flatMap(_._2)
+        .sorted
 
     val wordsOfNonDistinctSize: List[Word] =
-      wordLengthToWOrds
+      wordLengthToWords
         .filter(_._2.size != 1)
         .flatMap(_._2)
+        .sorted
 
     wordsOfDistinctSize ++ wordsOfNonDistinctSize
   }

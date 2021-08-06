@@ -226,4 +226,14 @@ class Crossword101Test extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
+  test("test3 full test") {
+    val input = Crossword101Inputs.test3
+    val crossword = Crosswords101.parseInput(input)
+    val actual = Crosswords101.solveCrossword(crossword).toString
+    val expected = Crossword101Inputs.result3
+    println(s"expected :\n${expected}")
+    println(s"actual   :\n${actual}")
+    assertResult(expected)(actual)
+  }
+
 }
