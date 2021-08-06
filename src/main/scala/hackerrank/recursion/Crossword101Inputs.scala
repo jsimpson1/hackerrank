@@ -47,4 +47,16 @@ object Crossword101Inputs {
                   |+++++R++++
                   |+++++A++++
                   |++++++++++""".stripMargin
+
+  val test0MostlyFull = """+L++++++++
+               |+O++++++++
+               |+N++++++++
+               |+DELHI++++
+               |+O+++-++++
+               |+N+++-++++
+               |+++++-++++
+               |++ANKARA++
+               |+++++-++++
+               |+++++-++++
+               |AGRA;NORWAY;ENGLAND;GWALIOR""".stripMargin
 }

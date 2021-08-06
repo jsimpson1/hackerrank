@@ -1,7 +1,6 @@
 package hackerrank.recursion
 
 import scala.annotation.tailrec
-import scala.collection.immutable
 import scala.collection.immutable.ListMap
 
 object Crosswords101 {
@@ -12,48 +11,44 @@ object Crosswords101 {
     val input = Crossword101Inputs.test0
 
     println("input:")
-    val i = parseInput(input)
-    printInput(i)
+    val c = parseInput(input)
+    c.display
     println("output:")
-    printSolvedCrossword(i)
+    printSolvedCrossword(c)
   }
 
   object model {
-    case class Coordinate(rowIndex: Int, columnIndex: Int) {
+    case class Coordinate(rowIndex: Int, columnIndex: Int) extends Ordered[Coordinate] {
       override def toString: String = s"($rowIndex,$columnIndex)"
-      //      def isNextTo(c: Coordinate): Boolean = {
-      //        List(
-      //          c.columnIndex -1,
-      //          c.columnIndex + 1
-      //        ).contains(columnIndex) ||
-      //          List(
-      //            c.rowIndex -1,
-      //            c.rowIndex + 1
-      //          ).contains(rowIndex)
-      //      }
+
+      override def compare(that: Coordinate): Int = {
+        val xCompare = rowIndex.compare(that.rowIndex)
+        if (xCompare == 0) {
+          columnIndex.compare(that.columnIndex)
+        } else {
+          xCompare
+        }
+      }
     }
 
     object CrosswordSquare {
       def parse(c: Char, coordinate: Coordinate): CrosswordSquare = c match {
         case Open.value => Open(coordinate)
         case Closed.value => Closed(coordinate)
-        case letter => throw new RuntimeException(s"no letters expected but parse hit ${letter}")
+        case letter => Letter(letter, coordinate)
       }
     }
 
-    sealed trait CrosswordSquare {
+    sealed trait CrosswordSquare extends Ordered[CrosswordSquare]{
       def value: Char
-
       def coordinate: Coordinate
-
       def isClosed: Boolean = value.equals(Closed.value)
-
       def isOpen: Boolean = value.equals(Open.value)
-
       def isLetter: Boolean = !isOpen && !isClosed
-
       def hasSameCoordinates(cs: CrosswordSquare): Boolean = coordinate.equals(cs.coordinate)
-      //      def touches(cs: CrosswordSquare): Boolean = this.coordinate.isNextTo(cs.coordinate)
+
+      override def compare(that: CrosswordSquare): Int =
+        coordinate.compare(that.coordinate)
     }
 
     object Open {
@@ -89,7 +84,25 @@ object Crosswords101 {
       def length: Int = value.length
     }
 
-    case class CrosswordLine(squares: List[CrosswordSquare]) {
+    case class CrosswordLine(squares: List[CrosswordSquare]) extends Ordered[CrosswordLine]{
+
+      lazy val columnIndexToSquares: Map[Int, List[CrosswordSquare]] =
+        squares
+          .groupBy(_.coordinate.columnIndex)
+
+      lazy val rowIndexToSquares: Map[Int, List[CrosswordSquare]] =
+        squares
+          .groupBy(_.coordinate.rowIndex)
+
+      override def compare(that: CrosswordLine): Int = {
+        squares
+          .zip(that.squares)
+          .map{ squarePair =>
+            squarePair._1.compare(squarePair._2)
+          }
+          .sum
+      }
+
       def sortedSquares: List[CrosswordSquare] =
         if (isRow) squares.sortBy(_.coordinate.rowIndex).reverse
         else squares.sortBy(_.coordinate.columnIndex).reverse
@@ -98,8 +111,10 @@ object Crosswords101 {
         if ( word.length != squares.length) {
           false
         } else {
+          val ss =
           sortedSquares
             .zip(word.value)
+          ss
             .forall{ squareToChar =>
               squareToChar._1 match {
                 case Letter(c, _) =>
@@ -117,19 +132,37 @@ object Crosswords101 {
         squares
           .forall(_.isLetter)
 
-      def isRow: Boolean =
+      def isPartiallyFilled: Boolean =
         squares
-          .groupBy(_.coordinate.rowIndex)
+          .exists(_.isLetter) && !isFilled
+
+      def isRow: Boolean =
+        rowIndexToSquares
           .size == 1
 
       def isColumn: Boolean =
-        squares
-          .groupBy(_.coordinate.columnIndex)
+        columnIndexToSquares
           .size == 1
 
-      def size: Int = squares.size
+      def rowIndex: Option[Int] =
+        if ( isRow )
+          squares
+            .headOption
+            .map(_.coordinate.rowIndex)
+        else
+          None
 
-      def getAllWordOpenings: List[CrosswordLine] = {
+      def columnIndex: Option[Int] =
+        if ( isRow )
+          squares
+            .headOption
+            .map(_.coordinate.columnIndex)
+        else
+          None
+
+      def length: Int = squares.length
+
+      lazy val allWordOpenings: List[CrosswordLine] = {
         @tailrec
         def resolvedOpenLines(
           squares: List[CrosswordSquare],
@@ -139,7 +172,12 @@ object Crosswords101 {
           squares
             .headOption match {
             case None =>
-              result
+              if ( sequentialSquare.nonEmpty ){
+                result :+ CrosswordLine(sequentialSquare)
+              } else {
+                result
+              }
+
             case Some(nextSquare) =>
               if (!nextSquare.isClosed) {
                 val nextSequentialSquare = nextSquare :: sequentialSquare
@@ -157,34 +195,77 @@ object Crosswords101 {
 
         resolvedOpenLines(squares, Nil, Nil)
       }
+
+
     }
 
-    case class PlaceWordResult(success: Boolean, crossword: Crossword)
+    case class PlaceWordResult(remainingWord: Option[Word], crossword: Crossword)
 
-    case class Crossword(squares: List[CrosswordSquare]) {
+    case class Crossword(originalWords: List[Word], squares: List[CrosswordSquare]) {
+
+      def placeWords(words: List[Word]): Crossword = {
+        def r(remainingWords: List[Word]): Crossword = {
+          remainingWords match {
+           case Nil =>
+             this
+           case word :: remainder =>
+             placeWord(word)match {
+               case PlaceWordResult(unplacedWOrd, crossword) =>
+                 if ( crossword.isCrosswordComplete ) {
+                   crossword
+                 } else {
+                   println(s"placeWords -- next unplacedWOrd=${unplacedWOrd}, crossword:\n${crossword}")
+                   unplacedWOrd match {
+                     case None =>
+                       crossword.placeWords(remainder)
+                     case Some(w) =>
+                       if ( remainder.isEmpty ){
+                         crossword
+                       } else {
+                         val nextRemainder = remainder :+ w
+                         println(s"placeWords -- next unplacedWOrd=${unplacedWOrd}, crossword:\n${crossword}")
+                         crossword.placeWords(nextRemainder)
+                       }
+                   }
+                 }
+             }
+         }
+        }
+        r(words)
+      }
 
       def placeWord(word: Word): PlaceWordResult = {
-        getRemainingWordOpenings
-          .filter(line =>
-            !line.isFilled && line.canMatch(word)
-        ) match {
+        val potentialOpenings =
+        remainingWordOpenings
+          .filter { line =>
+            val filled = !line.isFilled
+            val canMatch = line.canMatch(word)
+            filled && canMatch
+          }
+        potentialOpenings match {
             case List(line) =>
-              PlaceWordResult(success = true, updateLine(line, word))
-            case _ =>
-              PlaceWordResult(success = false, this)
+              PlaceWordResult(None, updateLine(line, word))
+            case multiLines =>
+              multiLines
+                .find(line =>
+                  line.isPartiallyFilled
+                ).map(line =>
+                  PlaceWordResult(None, updateLine(line, word))
+                ).getOrElse(
+                  PlaceWordResult(Some(word), this)
+                )
           }
       }
 
-      def updateSquare(square: CrosswordSquare, char: Char): Crossword =
-        Crossword(
-          squares
-            .map(s =>
-              if (s.hasSameCoordinates(square))
-                Letter(char, square.coordinate)
-              else
-                s
-            )
-        )
+      def updateSquare(square: CrosswordSquare, char: Char): Crossword = {
+        val updatedSquares = squares.map(s =>
+            if (s.hasSameCoordinates(square))
+              Letter(char, square.coordinate)
+            else
+              s
+          )
+        this.copy(squares = updatedSquares)
+      }
 
       def updateLine(line: CrosswordLine, word: Word): Crossword = {
         val squareToChar: List[(CrosswordSquare, Char)] =
@@ -203,38 +284,45 @@ object Crosswords101 {
           }
         }
 
-        r(squareToChar, Crossword(squares))
+        r(squareToChar, this)
       }
 
-      def rows: List[CrosswordLine] =
+      def resolveLines(isRow: Boolean): List[CrosswordLine] = {
         squares
-          .groupBy(square =>
-            square
-              .coordinate
-              .rowIndex
-          ).map(v =>
-          CrosswordLine(v._2)
-        ).toList
+          .groupBy { square =>
+            val coord = square.coordinate
+            if (isRow)
+              coord.rowIndex
+            else
+              coord.columnIndex
+          }.map(v =>
+            CrosswordLine(v._2)
+          )
+          .toList
+      }
 
-      def columns: List[CrosswordLine] =
-        squares
-          .groupBy(square =>
-            square
-              .coordinate
-              .columnIndex
-          ).map(v =>
-          CrosswordLine(v._2)
-        ).toList
+      val rows: List[CrosswordLine] = resolveLines(true)
 
-      def getRowWordOpenings: List[CrosswordLine] =
+      val columns: List[CrosswordLine] = resolveLines(false)
+
+      val rowWordOpenings: List[CrosswordLine] =
         rows
-          .flatMap(_.getAllWordOpenings)
+          .flatMap(_.allWordOpenings)
+          .filterNot(_.isFilled)
 
-      def getColumnWordOpenings: List[CrosswordLine] =
-        columns
-          .flatMap(_.getAllWordOpenings)
+      val columnWordOpenings: List[CrosswordLine] = {
+       val openings =
+         columns
+          .flatMap(_.allWordOpenings)
 
-      def getRemainingWordOpenings: List[CrosswordLine] = getRowWordOpenings ++ getColumnWordOpenings
+        openings.filterNot(_.isFilled)
+      }
+
+      lazy val remainingWordOpenings: List[CrosswordLine] =
+        (rowWordOpenings ++ columnWordOpenings)
+          .filter(cl => originalWords.map(_.length).contains(cl.length))
+
+      def isCrosswordComplete: Boolean = remainingWordOpenings.isEmpty
 
       override def toString: String = {
         ListMap(
@@ -250,23 +338,25 @@ object Crosswords101 {
           .mkString("\n")
       }
 
+      def display: Unit =
+      println(
+        s"""originalWords:
+           |${originalWords.map(w => s"${w.value.length} - ${w.value}").mkString("\n")}
+           |crossword:
+           |${toString}""".stripMargin
+      )
+
     }
 
     case class Input(words: List[Word], crossword: Crossword)
 
   }
 
-  def printInput(i: Input): Unit =
-    println(
-      s"""words:
-         |${i.words.map(w => s"${w.value.length} - ${w.value}").mkString("\n")}
-         |crossword:
-         |${i.crossword}""".stripMargin
-    )
-
-  def parseInput(input: String): Input = {
+  def parseInput(input: String): Crossword = {
     val lines = input.lines.toList
+    val words = lines(10).split(";").toList.map(Word)
     val c = Crossword(
+      words,
       List
         .range(0, 10)
         .flatMap { rowIndex =>
@@ -279,96 +369,41 @@ object Crosswords101 {
             .toList
         }
     )
-    val words = lines(10).split(";").toList.map(Word)
-    Input(words, c)
+    c
   }
 
-  def printSolvedCrossword(input: Input): Unit =
-    println(solveCrossword(input.words, input.crossword))
+  def printSolvedCrossword(c: Crossword): Unit =
+    println(solveCrossword(c))
 
-  case class CrosswordIteration(remainingWords: List[Word], currentCrossword: Crossword)
-
-  def resolvedWordsByLength(words: List[Word], crossword: Crossword): CrosswordIteration = {
-    val wordLengthToWords: Map[Int, List[Word]] =
+  def sortWordsByLength(words: List[Word]): List[Word] = {
+    val wordLengthToWOrds: List[(Int, List[Word])] =
       words
         .groupBy(_.length)
-
-    val wordsOfDistinctLength: Map[Int, List[Word]] =
-      wordLengthToWords
-        .filter(_._2.size == 1)
-
-    val remainingWords: List[Word] =
-      wordLengthToWords
-        .filter(_._2.size > 1)
-        .values
-        .flatten
         .toList
+        .sortBy(v => v._2.size)
 
-    def r(values: Map[Int, List[Word]], result: Crossword): Crossword = {
-      val lineToWords =
-      values
-        .flatMap { lengthToWord =>
-          crossword
-            .getRemainingWordOpenings
-            .filter(line =>
-              line.size == lengthToWord._1
-            ) match {
-            case List(line) =>
-              Some((line, lengthToWord._2))
-            case _ =>
-              None
-          }
-        }
+    val wordsOfDistinctSize: List[Word] =
+      wordLengthToWOrds
+        .filter(_._2.size == 1)
+        .flatMap(_._2)
 
-    lineToWords
-      .headOption match {
-      case None =>
-        CrosswordIteration(words, crossword)
-      case Some(lineToWord) =>
-        lineToWord match {
-          case (line, List(word)) =>
-            val remainingWords = words.filterNot(_ == word)
-            resolvedWordsByLength(remainingWords, crossword.updateLine(line, word))
-          case (_, wordsOfSameLength) =>
-            val remainingWords = words.filterNot(w => wordsOfSameLength.contains(w))
-            resolvedWordsByLength(remainingWords, crossword)
-        }
-    }
+    val wordsOfNonDistinctSize: List[Word] =
+      wordLengthToWOrds
+        .filter(_._2.size != 1)
+        .flatMap(_._2)
+
+    wordsOfDistinctSize ++ wordsOfNonDistinctSize
   }
 
-    val nextCrossword = r(wordsOfDistinctLength, crossword)
-
-    CrosswordIteration(remainingWords, nextCrossword)
-  }
-
-  @tailrec
-  def placeWords(currentIteration: CrosswordIteration): Crossword = {
-    currentIteration
-      .remainingWords match {
+  def solveCrossword(crossword: Crossword): Crossword = {
+    crossword
+      .originalWords match {
         case Nil =>
-          currentIteration
-            .currentCrossword
-        case word :: remainder =>
-          currentIteration
-            .currentCrossword
-            .placeWord(word)match {
-            case PlaceWordResult(true, crossword) =>
-              placeWords(CrosswordIteration(remainder, crossword))
-            case PlaceWordResult(false, crossword) =>
-              placeWords(CrosswordIteration(remainder :+ word, crossword))
-          }
-
+          crossword
+        case words =>
+          val sortedWords = sortWordsByLength(words)
+          crossword.placeWords(sortedWords)
       }
-  }
-
-  def solveCrossword(words: List[Word], crossword: Crossword): Crossword = {
-    if ( words.isEmpty) {
-      crossword
-    } else {
-      val crosswordSeededByDistinctLengths = resolvedWordsByLength(words, crossword)
-      println(s"solveCrossword -- crosswordSeededByDistinctLengths=\n${crosswordSeededByDistinctLengths.currentCrossword}")
-      placeWords(crosswordSeededByDistinctLengths)
-    }
   }
 
 

@@ -48,7 +48,7 @@ class Crossword101Test extends AnyFunSuite {
     )
     val actual: List[CrosswordLine] =
       line
-        .getAllWordOpenings
+        .allWordOpenings
         .map(line =>
           line
             .copy(
@@ -79,7 +79,7 @@ class Crossword101Test extends AnyFunSuite {
     )
     val actual: List[CrosswordLine] =
       line
-        .getAllWordOpenings
+        .allWordOpenings
         .map(line =>
           line
             .copy(
@@ -120,7 +120,7 @@ class Crossword101Test extends AnyFunSuite {
     )
     val actual: List[CrosswordLine] =
       line
-        .getAllWordOpenings
+        .allWordOpenings
         .map(line =>
           line
             .copy(
@@ -153,7 +153,7 @@ class Crossword101Test extends AnyFunSuite {
 
   test("crossword toString 0 ") {
     val input = Crossword101Inputs.test0
-    val actual = Crosswords101.parseInput(input).crossword.toString
+    val actual = Crosswords101.parseInput(input).toString
     val expected = input.lines.take(10).mkString("\n")
     println(s"expected: ${expected}")
     assertResult(expected)(actual)
@@ -161,9 +161,68 @@ class Crossword101Test extends AnyFunSuite {
 
   test("crossword toString") {
     val input = Crossword101Inputs.test1
-    val actual = Crosswords101.parseInput(input).crossword.toString
+    val actual = Crosswords101.parseInput(input).toString
     val expected = input.lines.take(10).mkString("\n")
     println(s"expected: ${expected}")
+    assertResult(expected)(actual)
+  }
+
+  test("crossword word openings test 0") {
+    val input = Crossword101Inputs.test0
+    val crossword = Crosswords101.parseInput(input)
+    val actual = crossword.remainingWordOpenings.sorted
+    val expected = List(
+      CrosswordLine(List(Open(9,5),Open(8,5),Open(7,5),Open(6,5),Open(5,5),Open(4,5),Open(3,5))),
+      CrosswordLine(List(Open(5,1), Open(4,1), Open(3,1), Open(2,1), Open(1,1), Open(0,1))),
+      CrosswordLine(List(Open(3,5), Open(3,4), Open(3,3), Open(3,2), Open(3,1))),
+      CrosswordLine(List(Open(7,7), Open(7,6), Open(7,5), Open(7,4), Open(7,3), Open(7,2))),
+    ).sorted
+    println(s"crossword:\n${crossword}")
+    println(s"expected : ${expected}")
+    println(s"actual   : ${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("crossword openings") {
+    val input = Crossword101Inputs.test0MostlyFull
+    val crossword = Crosswords101.parseInput(input)
+    val actual = crossword.remainingWordOpenings.sorted
+    val expected =
+      List(
+        CrosswordLine(List(
+          Open(9,5),
+          Open(8,5),
+          Letter('A',7,5),
+          Open(6,5),
+          Open(5,5),
+          Open(4,5),
+          Letter('I',3,5),
+        )),
+      ).sorted
+    println(s"crossword:\n${crossword}")
+    println(s"expected : ${expected}")
+    println(s"actual   : ${actual}")
+    assertResult(expected)(actual)
+
+  }
+
+  test("test0 full test") {
+    val input = Crossword101Inputs.test0
+    val crossword = Crosswords101.parseInput(input)
+    val actual = Crosswords101.solveCrossword(crossword).toString
+    val expected = Crossword101Inputs.result0
+    println(s"expected :\n${expected}")
+    println(s"actual   :\n${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("test1 full test") {
+    val input = Crossword101Inputs.test1
+    val crossword = Crosswords101.parseInput(input)
+    val actual = Crosswords101.solveCrossword(crossword).toString
+    val expected = Crossword101Inputs.result1
+    println(s"expected :\n${expected}")
+    println(s"actual   :\n${actual}")
     assertResult(expected)(actual)
   }
 
