@@ -1,0 +1,95 @@
+package hackerrank.demo
+
+import org.scalatest.funsuite.AnyFunSuite
+
+class DateTest extends AnyFunSuite {
+
+  test("isAfter same day") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(false)(date0.isAfter(date1))
+  }
+
+  test("isAfter day older") {
+    val date0 = Date(2, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(true)(date0.isAfter(date1))
+  }
+
+  test("isAfter day younger") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(2, Month.January, 2021)
+    assertResult(false)(date0.isAfter(date1))
+  }
+
+  test("isAfter month older") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.February, 2021)
+    assertResult(false)(date0.isAfter(date1))
+  }
+
+  test("isAfter month younger") {
+    val date0 = Date(1, Month.February, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(true)(date0.isAfter(date1))
+  }
+
+  test("isAfter year older") {
+    val date0 = Date(1, Month.January, 2022)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(true)(date0.isAfter(date1))
+  }
+
+  test("isAfter year younger") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2022)
+    assertResult(false)(date0.isAfter(date1))
+  }
+
+
+
+  // ----------------------------
+
+  test("isBefore same date") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(false)(date0.isBefore(date1))
+  }
+
+  test("isBefore day older") {
+    val date0 = Date(2, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(false)(date0.isBefore(date1))
+  }
+
+  test("isBefore day younger") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(2, Month.January, 2021)
+    assertResult(true)(date0.isBefore(date1))
+  }
+
+  test("isBefore month older") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.February, 2021)
+    assertResult(true)(date0.isBefore(date1))
+  }
+
+  test("isBefore month younger") {
+    val date0 = Date(1, Month.February, 2021)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(false)(date0.isBefore(date1))
+  }
+
+  test("isBefore year older") {
+    val date0 = Date(1, Month.January, 2022)
+    val date1 = Date(1, Month.January, 2021)
+    assertResult(false)(date0.isBefore(date1))
+  }
+
+  test("isBefore year younger") {
+    val date0 = Date(1, Month.January, 2021)
+    val date1 = Date(1, Month.January, 2022)
+    assertResult(true)(date0.isBefore(date1))
+  }
+
+}
