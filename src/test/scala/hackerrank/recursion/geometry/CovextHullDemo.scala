@@ -1,6 +1,4 @@
-package hackerrank.recursion
-
-import hackerrank.recursion.ConvexHull.{Line, Point}
+package hackerrank.recursion.geometry
 
 object CovextHullDemo extends App {
 

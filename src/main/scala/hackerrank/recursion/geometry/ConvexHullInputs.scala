@@ -1,4 +1,4 @@
-package hackerrank.recursion
+package hackerrank.recursion.geometry
 
 object ConvexHullInputs {
 

@@ -1,14 +1,13 @@
-package hackerrank.recursion
+package hackerrank.recursion.geometry
 
-import hackerrank.recursion
-import hackerrank.recursion.ConvexHull._
+import hackerrank.recursion.geometry
 import org.scalatest.funsuite.AnyFunSuite
 
 class ConvexHullTest extends AnyFunSuite {
 
   def pointsTest(testName: String, input: String, expected: Set[Point]): Unit = {
-    val points = recursion.ConvexHull.inputToPoints(input)
-    val actual = recursion.ConvexHull.calcConvexHull(points).points
+    val points = ConvexHull.inputToPoints(input)
+    val actual = Polygon(points).resolvePerimeterPoints
     val msg =
       s"""${testName}
          |expected=${expected.toList.sortBy(v => (v.x, v.y))}
@@ -77,25 +76,25 @@ class ConvexHullTest extends AnyFunSuite {
 
   test("case 0 - perimeter"){
     val input = ConvexHullInputs.test0
-    val actual = recursion.ConvexHull.calcPerimeter(input)
+    val actual = ConvexHull.calcPerimeter(input)
     assertResult(12.2)(actual)
   }
 
   test("case 1 - perimeter"){
     val input = ConvexHullInputs.test1
-    val actual = recursion.ConvexHull.calcPerimeter(input)
+    val actual = ConvexHull.calcPerimeter(input)
     assertResult(8.3)(actual)
   }
 
   test("case 2 - perimeter"){
     val input = ConvexHullInputs.test2
-    val actual = recursion.ConvexHull.calcPerimeter(input)
+    val actual = ConvexHull.calcPerimeter(input)
     assertResult(3589.2)(actual)
   }
 
   test("case 2.0 - perimeter"){
     val input = ConvexHullInputs.test2_0
-    val actual = recursion.ConvexHull.calcPerimeter(input)
+    val actual = ConvexHull.calcPerimeter(input)
     assertResult(3589.2)(actual)
   }
 
