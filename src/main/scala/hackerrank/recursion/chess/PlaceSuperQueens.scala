@@ -59,27 +59,21 @@ object PlaceSuperQueens {
     val column = currentChessBoard.pieces.size + 1
     if ( currentChessBoard.isValidSolution ) {
       IndexedSeq(Some(currentChessBoard))
+    } else if (row > size.value && !currentChessBoard.pieces.exists(_.column == column)) {
+      IndexedSeq(None)
     } else {
-      if ( row > size.value) {
-        currentChessBoard
-          .pieces match {
-            case Nil =>
-              IndexedSeq(None)
-            case pieces =>
-              if ( !currentChessBoard.isValidSolution ) {
-                IndexedSeq(None)
-              } else {
-                val head = pieces.head
-                val tail = pieces.tail
-                val nextClosedSquares = closedSquares -- closedSquares.diff(head.potentialMoves.toSet)
-                r( head.row + 1, currentChessBoard.copy(pieces = tail), nextClosedSquares)
-              }
-          }
-      } else {
-        val potentialQueenSquare = ChessBoardSquare(row, column)
-        val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare, closedSquares)
-        if ( isValid ) {
-          val newQueen = SuperQueen(potentialQueenSquare)
+      val potentialQueenSquare = ChessBoardSquare(row, column)
+      val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare, closedSquares)
+      if (isValid) {
+        val newQueen = SuperQueen(potentialQueenSquare)
+
+        if ( column == 1 ) {
+          r(
+            row = 1,
+            currentChessBoard = currentChessBoard.copy(pieces = newQueen :: currentChessBoard.pieces),
+            closedSquares ++ newQueen.potentialMoves
+          )
+        } else {
           r(
             row = 1,
             currentChessBoard = currentChessBoard.copy(pieces = newQueen :: currentChessBoard.pieces),
@@ -89,9 +83,9 @@ object PlaceSuperQueens {
             currentChessBoard = currentChessBoard,
             closedSquares
           )
-        } else {
-          r(row + 1, currentChessBoard, closedSquares)
         }
+      } else {
+        r(row + 1, currentChessBoard, closedSquares)
       }
     }
   }
@@ -120,7 +114,6 @@ object PlaceSuperQueens {
       .flatMap { row =>
         r(row, ChessBoard(), Set())
       }.flatten
-      .distinct
   }
 
 }

@@ -343,6 +343,16 @@ class SuperQueenTest extends AnyFunSuite {
 
   }
 
+  test("place queens n = 10"){
+    val actual = PlaceSuperQueens.placeQueens(10).size
+
+    val expected: Int = 4
+
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
   test("place queens n = 11"){
     val actual = PlaceSuperQueens.placeQueens(11).size
 
