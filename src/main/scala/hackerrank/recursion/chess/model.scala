@@ -5,19 +5,18 @@ object model {
   case class ChessBoardSize(value: Int)
 
   case class ChessBoard(
-    pieces: List[ChessPiece] = List(),
+    pieces: List[SuperQueen] = List(),
   )(
     implicit size: ChessBoardSize
   ) {
 
-    lazy val rowOrColumns: List[Int] = (1 to size.value).toList
-
     lazy val squares: List[ChessBoardSquare] =
-      rowOrColumns.flatMap{ row =>
-        rowOrColumns.map { column =>
+      (1 to size.value).flatMap{ row =>
+        (1 to size.value).map { column =>
           ChessBoardSquare(row, column)
         }
-      }.sorted
+      }.toList
+      .sorted
 
     override def toString: String =
       squares
@@ -169,9 +168,14 @@ object model {
         knightLeftDownMove, knightLeftUpMove
       ).flatten
 
+    def knightMovesToLeft: IndexedSeq[ChessBoardSquare] =
+      IndexedSeq(
+        knightUpLeftMove, knightDownLeftMove, knightLeftDownMove, knightLeftUpMove
+      ).flatten
+
   }
 
-  trait ChessPiece extends HasPosition with Ordered[ChessPiece] {
+  trait ChessPiece extends HasPosition {
     def potentialMoves: IndexedSeq[ChessBoardSquare]
   }
 
@@ -187,7 +191,7 @@ object model {
   )(
     override implicit
     val size: ChessBoardSize
-  ) extends ChessPiece with HorizontalMove with VerticalMove with DiagonalMove with KnightMoves {
+  ) extends Ordered[SuperQueen] with ChessPiece with HorizontalMove with VerticalMove with DiagonalMove with KnightMoves {
 
     def knightMovesToRight: IndexedSeq[ChessBoardSquare] =
       IndexedSeq(
@@ -203,7 +207,7 @@ object model {
       diagonalDownRight ++
       knightMovesToRight
 
-    override def compare(that: ChessPiece): Int =
+    override def compare(that: SuperQueen): Int =
       this.position.compare(that.position)
   }
 

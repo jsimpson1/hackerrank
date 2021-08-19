@@ -9,6 +9,39 @@ class SuperQueenTest extends AnyFunSuite {
 
   implicit val chessBoardRows: ChessBoardSize = ChessBoardSize(10)
 
+  test("SuperQueen diagonalUpLeft simple case") {
+    val queen = SuperQueen(ChessBoardSquare(2, 2))
+    val actual = queen.diagonalUpLeft.toList.sorted
+    val expected = List(
+      ChessBoardSquare(1,1),
+    )
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("SuperQueen horizontalLeft") {
+    val queen = SuperQueen(ChessBoardSquare(1, 2))
+    val actual = queen.horizontalLeft.toList.sorted
+    val expected = List(
+      ChessBoardSquare(1,1),
+    )
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("SuperQueen horizontalRight") {
+    val queen = SuperQueen(ChessBoardSquare(1, 9))
+    val actual = queen.horizontalRight.toList.sorted
+    val expected = List(
+      ChessBoardSquare(1,10),
+    )
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
   test("SuperQueen verticalMoves") {
     val queen = SuperQueen(ChessBoardSquare(5, 5))
     val actual = queen.verticalMoves.toList.sorted
@@ -320,7 +353,27 @@ class SuperQueenTest extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
-  ignore("place queens n = 14"){
+  test("place queens n = 12"){
+    val actual = PlaceSuperQueens.placeQueens(12).size
+
+    val expected: Int = 156
+
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("place queens n = 13"){
+    val actual = PlaceSuperQueens.placeQueens(13).size
+
+    val expected: Int = 1876
+
+    println(s"expected: ${expected}")
+    println(s"actual  : ${actual}")
+    assertResult(expected)(actual)
+  }
+
+  test("place queens n = 14"){
     val actual = PlaceSuperQueens.placeQueens(14).size
 
     val expected: Int = 5180

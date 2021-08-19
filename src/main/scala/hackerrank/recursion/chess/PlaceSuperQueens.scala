@@ -1,26 +1,37 @@
 package hackerrank.recursion.chess
 
-import hackerrank.recursion.chess.model._
+import hackerrank.recursion.chess.model.{DiagonalMove, _}
 
-import scala.annotation.tailrec
-import scala.collection.immutable
-import scala.collection.immutable.Stack
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 object PlaceSuperQueens {
 
   def main(args: Array[String]): Unit = {
 
-    val n = 11
+    val n = 13
 
 //    singleRecursionDemo(3, n)
 
-    mainDemo(n)
+    val start = new Date()
 
+    mainDemo(n)
+    val end = new Date()
+
+    println(s"time diff = ${getDateDiff(start, end, TimeUnit.SECONDS)}")
+
+  }
+
+
+
+  def getDateDiff(date1: Date, date2: Date, timeUnit: TimeUnit): Long = {
+    val diffInMillies = date2.getTime - date1.getTime
+    timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS)
   }
 
   def singleRecursionDemo(startRow: Int, n: Int) = {
     implicit val size: ChessBoardSize = ChessBoardSize(n)
-    val result: IndexedSeq[ChessBoard] = r(startRow, ChessBoard()).flatten // works
+    val result = r(startRow, ChessBoard()).flatten // works
     println(s"singleRecursionDemo -- result size =${result.size}")
     result.foreach{ chessboard =>
       println(chessboard.toString)
@@ -54,19 +65,26 @@ object PlaceSuperQueens {
             case Nil =>
               IndexedSeq(None)
             case pieces =>
-              val isInvalidSolution: Boolean = !currentChessBoard.isValidSolution || currentChessBoard.pieces.exists(_.column == column)
-              if ( isInvalidSolution ) {
+              if ( !currentChessBoard.isValidSolution ) {
                 IndexedSeq(None)
               } else {
-                r( pieces.head.row + 1, currentChessBoard.copy(pieces = pieces.tail))
+                val head = pieces.head
+                val tail = pieces.tail
+                r( head.row + 1, currentChessBoard.copy(pieces = tail))
               }
           }
       } else {
         val potentialQueenSquare = ChessBoardSquare(row, column)
         val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare)
         if ( isValid ) {
-          val newPieces: List[ChessPiece] = SuperQueen(potentialQueenSquare) :: currentChessBoard.pieces
-          r(1, currentChessBoard.copy(pieces = newPieces)) ++ r(row + 1, currentChessBoard)
+          val newQueen = SuperQueen(potentialQueenSquare)
+          r(
+            row = 1,
+            currentChessBoard = currentChessBoard.copy(pieces = newQueen :: currentChessBoard.pieces),
+          ) ++ r(
+            row = row + 1,
+            currentChessBoard = currentChessBoard,
+          )
         } else {
           r(row + 1, currentChessBoard)
         }
@@ -74,26 +92,29 @@ object PlaceSuperQueens {
     }
   }
 
-  def isPlacementValid(chessboard: ChessBoard, square: ChessBoardSquare): Boolean = {
+  def isPlacementValid(
+    chessboard: ChessBoard,
+    square: ChessBoardSquare,
+  )(implicit size: ChessBoardSize): Boolean = {
     !chessboard
       .pieces
-      .exists { piece =>
-        piece.potentialMoves.contains(square)
-      }
+        .exists { piece =>
+          lazy val sameRow = piece.horizontalRight.contains(square)
+          lazy val sameDiagonal = piece.diagonalDownRight.contains(square) || piece.diagonalUpRight.contains(square)
+          lazy val sameKnight = piece.knightMovesToRight.contains(square)
+          sameRow || sameDiagonal || sameKnight
+        }
   }
 
   def placeQueens(n: Int): IndexedSeq[ChessBoard] = {
 
     implicit val size: ChessBoardSize = ChessBoardSize(n)
 
-    val result: IndexedSeq[ChessBoard] =
     (1 to n)
       .flatMap { row =>
         r(row, ChessBoard())
       }.flatten
       .distinct
-
-    result
   }
 
 }
