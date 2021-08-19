@@ -4,6 +4,7 @@ import hackerrank.recursion.chess.model.{DiagonalMove, _}
 
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import scala.math.abs
 
 object PlaceSuperQueens {
 
@@ -31,7 +32,7 @@ object PlaceSuperQueens {
 
   def singleRecursionDemo(startRow: Int, n: Int) = {
     implicit val size: ChessBoardSize = ChessBoardSize(n)
-    val result = r(startRow, ChessBoard(), Set()).flatten // works
+    val result = r(startRow, ChessBoard(), Set()) // works
     println(s"singleRecursionDemo -- result size =${result.size}")
     result.foreach{ chessboard =>
       println(chessboard.toString)
@@ -55,12 +56,12 @@ object PlaceSuperQueens {
   )(
     implicit
       size: ChessBoardSize
-  ): IndexedSeq[Option[ChessBoard]] = {
+  ): IndexedSeq[ChessBoard] = {
     val column = currentChessBoard.pieces.size + 1
     if ( currentChessBoard.isValidSolution ) {
-      IndexedSeq(Some(currentChessBoard))
+      IndexedSeq(currentChessBoard)
     } else if (row > size.value && !currentChessBoard.pieces.exists(_.column == column)) {
-      IndexedSeq(None)
+      IndexedSeq()
     } else {
       val potentialQueenSquare = ChessBoardSquare(row, column)
       val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare, closedSquares)
@@ -99,10 +100,10 @@ object PlaceSuperQueens {
     !chessboard
       .pieces
         .exists { piece =>
-          lazy val sameRow = piece.horizontalRight.contains(square)
-          lazy val sameDiagonal = piece.diagonalDownRight.contains(square) || piece.diagonalUpRight.contains(square)
-          lazy val sameKnight = piece.knightMovesToRight.contains(square)
-          sameRow || sameDiagonal || sameKnight
+          lazy val sameRow = piece.row == square.row
+          lazy val sameDiagonal = abs(piece.row - square.row) == abs(piece.column - square.column)
+          lazy val sameKnight = abs(piece.row - square.row) <= 2 && abs(piece.column - square.column) <= 2
+          sameKnight || sameRow || sameDiagonal
         }
   }
 
@@ -113,7 +114,7 @@ object PlaceSuperQueens {
     (1 to n)
       .flatMap { row =>
         r(row, ChessBoard(), Set())
-      }.flatten
+      }
   }
 
 }
