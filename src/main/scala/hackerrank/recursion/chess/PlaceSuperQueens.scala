@@ -9,7 +9,7 @@ object PlaceSuperQueens {
 
   def main(args: Array[String]): Unit = {
 
-    val n = 13
+    val n = 10
 
 //    singleRecursionDemo(3, n)
 
@@ -31,7 +31,7 @@ object PlaceSuperQueens {
 
   def singleRecursionDemo(startRow: Int, n: Int) = {
     implicit val size: ChessBoardSize = ChessBoardSize(n)
-    val result = r(startRow, ChessBoard()).flatten // works
+    val result = r(startRow, ChessBoard(), Set()).flatten // works
     println(s"singleRecursionDemo -- result size =${result.size}")
     result.foreach{ chessboard =>
       println(chessboard.toString)
@@ -51,12 +51,13 @@ object PlaceSuperQueens {
   def r(
     row: Int,
     currentChessBoard: ChessBoard,
+    closedSquares: Set[ChessBoardSquare],
   )(
     implicit
       size: ChessBoardSize
   ): IndexedSeq[Option[ChessBoard]] = {
     val column = currentChessBoard.pieces.size + 1
-    if ( currentChessBoard.pieces.size == size.value ) {
+    if ( currentChessBoard.isValidSolution ) {
       IndexedSeq(Some(currentChessBoard))
     } else {
       if ( row > size.value) {
@@ -70,23 +71,26 @@ object PlaceSuperQueens {
               } else {
                 val head = pieces.head
                 val tail = pieces.tail
-                r( head.row + 1, currentChessBoard.copy(pieces = tail))
+                val nextClosedSquares = closedSquares -- closedSquares.diff(head.potentialMoves.toSet)
+                r( head.row + 1, currentChessBoard.copy(pieces = tail), nextClosedSquares)
               }
           }
       } else {
         val potentialQueenSquare = ChessBoardSquare(row, column)
-        val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare)
+        val isValid = isPlacementValid(currentChessBoard, potentialQueenSquare, closedSquares)
         if ( isValid ) {
           val newQueen = SuperQueen(potentialQueenSquare)
           r(
             row = 1,
             currentChessBoard = currentChessBoard.copy(pieces = newQueen :: currentChessBoard.pieces),
+            closedSquares ++ newQueen.potentialMoves
           ) ++ r(
             row = row + 1,
             currentChessBoard = currentChessBoard,
+            closedSquares
           )
         } else {
-          r(row + 1, currentChessBoard)
+          r(row + 1, currentChessBoard, closedSquares)
         }
       }
     }
@@ -95,7 +99,9 @@ object PlaceSuperQueens {
   def isPlacementValid(
     chessboard: ChessBoard,
     square: ChessBoardSquare,
+    closedRows: Set[ChessBoardSquare]
   )(implicit size: ChessBoardSize): Boolean = {
+    !closedRows.contains(square) &&
     !chessboard
       .pieces
         .exists { piece =>
@@ -112,7 +118,7 @@ object PlaceSuperQueens {
 
     (1 to n)
       .flatMap { row =>
-        r(row, ChessBoard())
+        r(row, ChessBoard(), Set())
       }.flatten
       .distinct
   }
