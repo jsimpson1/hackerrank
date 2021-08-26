@@ -355,7 +355,7 @@ object Crosswords101 {
   }
 
   def parseInput(input: String): Crossword = {
-    val lines = input.lines.toList
+    val lines = input.split("\n").toList
     try {
       val words = lines(10).split(";").toList.map(Word)
       Crossword(

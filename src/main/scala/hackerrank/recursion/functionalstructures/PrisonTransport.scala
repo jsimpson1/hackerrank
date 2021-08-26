@@ -2,7 +2,6 @@ package hackerrank.recursion.functionalstructures
 
 import java.util.UUID
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
 
 object PrisonTransport {
 
@@ -33,7 +32,7 @@ object PrisonTransport {
 
   def parseInput(input: String): (Int, IndexedSeq[PrisonerPair]) = {
 
-    val lines = input.lines.toIndexedSeq
+    val lines = input.split("\n").toIndexedSeq
     val numOfPrisoners = lines.head.toInt
     val numOfPairs = lines(1).toInt
 
