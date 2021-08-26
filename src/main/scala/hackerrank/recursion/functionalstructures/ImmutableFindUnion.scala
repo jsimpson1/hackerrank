@@ -13,7 +13,7 @@ object ImmutableFindUnion {
 
 case class Node(parent: Option[Int], treeSize: Int)
 
-class ImmutableFindUnion(nodes: Vector[Node]) extends UnionFind {
+class ImmutableFindUnion(nodes: Vector[Node]) {
 
   def union(t1: Int, t2: Int): ImmutableFindUnion = {
     if (t1 == t2) return this
@@ -42,7 +42,7 @@ class ImmutableFindUnion(nodes: Vector[Node]) extends UnionFind {
     new ImmutableFindUnion(newNodes)
   }
 
-  def connected(t1: Int, t2: Int): Boolean =
+  def find(t1: Int, t2: Int): Boolean =
     t1 == t2 || root(t1) == root(t2)
 
   @tailrec
@@ -52,5 +52,7 @@ class ImmutableFindUnion(nodes: Vector[Node]) extends UnionFind {
       case None => t
       case Some(p) => root(p)
     }
+
+  def findParent(t: Int): Int = root(t)
 
 }

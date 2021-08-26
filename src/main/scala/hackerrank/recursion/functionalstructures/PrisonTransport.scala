@@ -1,6 +1,5 @@
 package hackerrank.recursion.functionalstructures
 
-import java.util.UUID
 import scala.annotation.tailrec
 
 object PrisonTransport {
@@ -56,7 +55,7 @@ object PrisonTransport {
 
   def calcBuses(numOfPrisoners: Int, prisonerPairs: IndexedSeq[PrisonerPair]): IndexedSeq[Bus] = {
 
-    val chainGangs: IndexedSeq[ChainGang] = establishChainGangs(prisonerPairs)
+    val chainGangs: IndexedSeq[ChainGang] = establishChainGangs(numOfPrisoners, prisonerPairs)
 
     val unpairedPrisoners: Int = numOfPrisoners - chainGangs.map(_.prisoners.size).sum
 
@@ -81,34 +80,42 @@ object PrisonTransport {
     r(prisonerGroupSizes, IndexedSeq())
   }
 
-  def establishChainGangs(prisonerPairs: IndexedSeq[PrisonerPair]): IndexedSeq[ChainGang] = {
-    @tailrec
-    def r(prisonerPair: IndexedSeq[PrisonerPair], chainGangs: IndexedSeq[ChainGang]): IndexedSeq[ChainGang] = {
-      prisonerPair match {
-        case Seq() =>
-          chainGangs
-        case h +: tail =>
-          val existingGangs: IndexedSeq[ChainGang] =
-            chainGangs
-              .filter(g =>
-                g.prisoners.contains(h.pOne) || g.prisoners.contains(h.pTwo)
-              )
-          val newChainGang: ChainGang =
-            existingGangs
-             match {
-                case IndexedSeq(g0, g1) =>
-                  ChainGang(h.prisonerSet ++ g0.prisoners ++ g1.prisoners)
-                case IndexedSeq(g0) =>
-                  ChainGang(h.prisonerSet ++ g0.prisoners)
-                case Seq() =>
-                  h.asChainGang
-                case _ => throw new RuntimeException("there should never be three chaingangs that share two prisoners")
-              }
-          val nextChainGangs: IndexedSeq[ChainGang] = newChainGang +: chainGangs.diff(existingGangs)
-          r(tail, nextChainGangs)
+  def establishChainGangs(numOfPrisoners: Int, prisonerPairs: IndexedSeq[PrisonerPair]): IndexedSeq[ChainGang] = {
+
+    val allPrisoners: Set[Prisoner] = prisonerPairs.flatMap(_.prisonerSet).toSet
+
+    val findUnion = new MutableFindUnion(numOfPrisoners + 1)
+
+    prisonerPairs
+      .foreach { pp =>
+        findUnion.union(pp.pOne.number, pp.pTwo.number)
       }
+
+
+    @tailrec
+    def r(prisoners: Set[Prisoner] , result: Map[Int, IndexedSeq[Prisoner]]): IndexedSeq[ChainGang] = {
+      prisoners
+        .headOption match {
+          case None =>
+            result
+              .values
+              .map(value =>
+                ChainGang(value.toSet)
+              ).toIndexedSeq
+          case Some(prisoner) =>
+            val parent: Int = findUnion.findParent(prisoner.number)
+            result
+              .get(parent) match {
+                case None =>
+                  r(prisoners.tail, result.+((parent, IndexedSeq(prisoner))))
+                case Some(prisonerGroup) =>
+                  r(prisoners.tail, result.+((parent, prisoner +: prisonerGroup)))
+              }
+        }
     }
-    r(prisonerPairs, IndexedSeq())
+
+    r(allPrisoners, Map())
+
   }
 
   object model {
@@ -119,7 +126,7 @@ object PrisonTransport {
       override def compare(that: Bus): Int = capacity.compare(that.capacity)
     }
 
-    case class ChainGang(prisoners: Set[Prisoner], id: String = UUID.randomUUID().toString)
+    case class ChainGang(prisoners: Set[Prisoner])
 
     case class Prisoner(number: Int)
 

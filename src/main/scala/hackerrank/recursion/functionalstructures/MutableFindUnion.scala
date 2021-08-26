@@ -1,8 +1,10 @@
 package hackerrank.recursion.functionalstructures
 
+import hackerrank.recursion.functionalstructures
+
 import scala.annotation.tailrec
 
-class MutableFindUnion(val size: Int) extends UnionFind {
+class MutableFindUnion(val size: Int) {
 
   private case class Node(var parent: Option[Int], var treeSize: Int)
 
@@ -28,7 +30,7 @@ class MutableFindUnion(val size: Int) extends UnionFind {
     this
   }
 
-  def connected(t1: Int, t2: Int): Boolean =
+  def find(t1: Int, t2: Int): Boolean =
     t1 == t2 || root(t1) == root(t2)
 
   @tailrec
@@ -38,5 +40,7 @@ class MutableFindUnion(val size: Int) extends UnionFind {
       case None => t
       case Some(p) => root(p)
     }
+
+  def findParent(t: Int): Int = root(t)
 
 }
