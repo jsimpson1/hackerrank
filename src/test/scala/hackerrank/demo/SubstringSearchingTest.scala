@@ -4,6 +4,36 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class SubstringSearchingTest extends AnyFunSuite {
 
+//  test("innerPatternSize - case 0 - computer ") {
+//    val text = "computer".toList
+//    val pattern = "muter".toList
+//    assertResult(0)(SubstringSearching.innerPatternSize(pattern, text, 'o'))
+//  }
+//
+//  test("innerPatternSize - case 0 - omputer ") {
+//    val text = "omputer".toList
+//    val pattern = "muter".toList
+//    assertResult(0)(SubstringSearching.innerPatternSize(pattern, text, 'm'))
+//  }
+//
+//  test("innerPatternSize - case 0 - mputer ") {
+//    val text = "mputer".toList
+//    val pattern = "muter".toList
+//    assertResult(0)(SubstringSearching.innerPatternSize(pattern, text, 'p'))
+//  }
+//
+//  test("innerPatternSize - case 0 - puter ") {
+//    val text = "puter".toList
+//    val pattern = "muter".toList
+//    assertResult(0)(SubstringSearching.innerPatternSize(pattern, text, 'u'))
+//  }
+//
+//  test("innerPatternSize - case 0 - uter ") {
+//    val text = "uter".toList
+//    val pattern = "muter".toList
+//    assertResult(0)(SubstringSearching.innerPatternSize(pattern, text, 't'))
+//  }
+
 
   test("case 0 - abcdef") {
     assertResult(true)(SubstringSearching.hasPattern("abcdef", "def"))
@@ -44,14 +74,14 @@ class SubstringSearchingTest extends AnyFunSuite {
     assertResult(true)(actual)
   }
 
-  ignore("case 5 - 3") {
+  test("case 5 - 3") {
     val text = case5FullInput(7)
     val pattern = case5FullInput(8)
     val actual = SubstringSearching.hasPattern(text, pattern)
     assertResult(true)(actual)
   }
 
-  test("case 5 - 3 sortened") {
+  test("case 5 - 3 shortened 0") {
     val text = "eenegpurdzqahowsfhqcibixfzjcozegqguoqntgcouxeaabbdkzcfjmaomblvbutwjuhuvhagqfhtxpgghtlomdjcyhwmmbgswusqplvziqqzkptxtawswqqvjnqjpghhayctjnqgdvwculprcuioawxwbgskvkbvkxsxxkcbbkyskaepzaannhanmrpkpzstzoidmgoxyogiwyybbgshfeacaksyvrmilhkcylenuvokshjdnahddlqaqgzhfvgazxdgxgvferoaqyutuvbvadopgmnjuvesbuljlokiyexszumpgehuiswurhricrtcjbmkvcsbhuyaykkbnkjrqisstokaensjqtheznoxnlzqqyrboalzhxqwzcjcapntqnheyykgaitsghmviupfhqwokieomp"
     val pattern = "enegpurdzqahowsfhqcibixfzjcozegqguoqntgcouxeaabbdkzcfjmaomblvbutwjuhuvhagqfhtxpgghtlomdjcyhwmmbgswusqplvziqqzkptxtawswqqvjnqjpghhayctjnqgdvwculprcuioawxwbgskvkbvkxsxxkcbbkyskaepzaannhanmrpkpzstzoidmgoxyogiwyybbgshfeacaksyvrmilhkcylenuvokshjdnahddlqaqgzhfvga"
     val actual = SubstringSearching.hasPattern(text, pattern)

@@ -41,7 +41,7 @@ object SubstringSearching {
   def hasPattern(text: String, pattern: String): Boolean = {
     lazy val fullPattern = pattern.toList
     @tailrec
-    def r(chars: List[Char], pat: List[Char]): Boolean = {
+    def r(chars: List[Char], pat: List[Char], charsSoFar: List[Char]): Boolean = {
       chars match {
         case Nil =>
           if ( pat.isEmpty )
@@ -54,16 +54,19 @@ object SubstringSearching {
               true
             case ph :: pTail =>
               if ( ph == ch ) {
-                r(cTail, pTail)
+                r(cTail, pTail, ch :: charsSoFar)
               } else {
-                r(cTail, fullPattern)
+                if ( List(ch) == charsSoFar ) {
+                  r(cTail, fullPattern.drop(1), Nil)
+                } else {
+                  r(cTail, fullPattern, Nil)
+                }
               }
           }
       }
     }
-    r(text.toList, fullPattern)
+    r(text.toList, fullPattern, Nil)
   }
-
 
 
 }
