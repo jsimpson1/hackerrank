@@ -12,9 +12,9 @@ class SwapNodeTest extends AnyFunSuite {
     val actual = SwapNodes.buildTreeFromLines(input.split("\n")).sortedNodes
 
     val expected = List(
-      Node(1,Some(Node(2,None,None,1)), Some(Node(3,None,None,1)),0),
-      Node(2,None,None,1),
-      Node(3,None,None,1)
+      Node(2,EmptyNode,EmptyNode),
+      Node(1,Node(2,EmptyNode,EmptyNode), Node(3,EmptyNode,EmptyNode)),
+      Node(3,EmptyNode,EmptyNode)
     )
 
     println(s"actual:   ${actual}")
@@ -22,15 +22,15 @@ class SwapNodeTest extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
-  ignore("case 0 - swapNodes") {
+  test("case 0 - swapNodes") {
     val input = SwapNodeInputs.case0
 
     val actual = SwapNodes.swapNodesFromLines(input.split("\n")).sortedNodes
 
     val expected = List(
-      Node(1,Some(Node(3,None,None,1)),Some(Node(2,None,None,1)),0),
-      Node(2,None,None,1),
-      Node(3,None,None,1)
+      Node(2,EmptyNode,EmptyNode),
+      Node(1,Node(2,EmptyNode,EmptyNode), Node(3,EmptyNode,EmptyNode)),
+      Node(3,EmptyNode,EmptyNode)
     )
 
     println(s"actual:   ${actual}")
@@ -44,11 +44,11 @@ class SwapNodeTest extends AnyFunSuite {
     val actual = SwapNodes.buildTreeFromLines(input.split("\n")).sortedNodes
 
     val expected = List(
-      Node(1,Some(Node(2,None,None,1)),Some(Node(3,None,None,1)),0),
-      Node(2,None,Some(Node(4,None,None,2)),1),
-      Node(3,None,Some(Node(5,None,None,2)),1),
-      Node(4,None,None,2),
-      Node(5,None,None,2)
+      Node(2,EmptyNode,Node(4,EmptyNode,EmptyNode)),
+      Node(4,EmptyNode,EmptyNode),
+      Node(1,Node(2,EmptyNode,Node(4,EmptyNode,EmptyNode)),Node(3,EmptyNode,Node(5,EmptyNode,EmptyNode))),
+      Node(3,EmptyNode,Node(5,EmptyNode,EmptyNode)),
+      Node(5,EmptyNode,EmptyNode)
     )
 
     println(s"actual:   ${actual}")
@@ -56,17 +56,19 @@ class SwapNodeTest extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
-  ignore("case 1 - swapNodes") {
+  test("case 1 - swapNodes") {
     val input = SwapNodeInputs.case1
 
     val actual = SwapNodes.swapNodesFromLines(input.split("\n")).sortedNodes
 
-    val expected = List(
-      Node(1,Some(Node(2,None,None,1)),Some(Node(3,None,None,1)),0),
-      Node(2,Some(Node(4,None,None,2)), None,1),
-      Node(3,Some(Node(5,None,None,2)), None,1),
-      Node(4,None,None,2),
-      Node(5,None,None,2))
+    val expected =
+      List(
+        Node(4,EmptyNode,EmptyNode),
+        Node(2,Node(4,EmptyNode,EmptyNode),EmptyNode),
+        Node(1,Node(2,Node(4,EmptyNode,EmptyNode),EmptyNode),Node(3,Node(5,EmptyNode,EmptyNode),EmptyNode)),
+        Node(5,EmptyNode,EmptyNode),
+        Node(3,Node(5,EmptyNode,EmptyNode),EmptyNode)
+      )
 
     println(s"actual:   ${actual}")
     println(s"expected: ${expected}")
@@ -79,19 +81,17 @@ class SwapNodeTest extends AnyFunSuite {
     val actual = SwapNodes.buildTreeFromLines(input.split("\n")).sortedNodes
 
     val expected = List(
-      Node(1,Some(Node(2,None,None,1)),Some(Node(3,None,None,1)),0),
-      Node(2,Some(Node(4,None,None,2)), None,1),
-      Node(3,Some(Node(5,None,None,2)), None,1),
-//      Node(4,Some(Node(6,None,Some(Node(9,None,None,4)),3)), None,2),
-      Node(4,Some(Node(6,None,None,3)), None,2),
-//      Node(5,Some(Node(7,None,None,3)), Some(Node(8,Some(Node(10,None,None,4)),Some(Node(11,None,None,4)),3)),2),
-      Node(5,Some(Node(7,None,None,3)), Some(Node(8,None,None,3)),2),
-      Node(6,None, Some(Node(9,None,None,4)),3),
-      Node(7,None, None,3),
-      Node(8,Some(Node(10,None,None,4)), Some(Node(11,None,None,4)),3),
-      Node(9,None, None,4),
-      Node(10,None, None,4),
-      Node(11,None, None,4),
+      Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),
+      Node(9,EmptyNode,EmptyNode),
+      Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode),
+      Node(2,Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode),EmptyNode),
+      Node(1,Node(2,Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode),EmptyNode),Node(3,Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode))),EmptyNode)),
+      Node(7,EmptyNode,EmptyNode),
+      Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode))),
+      Node(10,EmptyNode,EmptyNode),
+      Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode)),
+      Node(11,EmptyNode,EmptyNode),
+      Node(3,Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode))),EmptyNode)
     )
 
     println(s"actual:   ${actual}")
@@ -99,13 +99,25 @@ class SwapNodeTest extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
-  ignore("case 2 - swapNodes") {
+  test("case 2 - swapNodes") {
     val input = SwapNodeInputs.case2
 
     val actual = SwapNodes.swapNodesFromLines(input.split("\n")).sortedNodes
 
-    val expected = List(
-    )
+    val expected =
+      List(
+        Node(2,EmptyNode,Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode)),
+        Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),
+        Node(9,EmptyNode,EmptyNode),
+        Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode),
+        Node(1,Node(2,EmptyNode,Node(4,Node(6,EmptyNode,Node(9,EmptyNode,EmptyNode)),EmptyNode)),Node(3,EmptyNode,Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode))))),
+        Node(3,EmptyNode,Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode)))),
+        Node(7,EmptyNode,EmptyNode),
+        Node(5,Node(7,EmptyNode,EmptyNode),Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode))),
+        Node(10,EmptyNode,EmptyNode),
+        Node(8,Node(10,EmptyNode,EmptyNode),Node(11,EmptyNode,EmptyNode)),
+        Node(11,EmptyNode,EmptyNode)
+      )
 
     println(s"actual:   ${actual}")
     println(s"expected: ${expected}")
