@@ -57,50 +57,82 @@ object SwapNodes {
 
   def buildTree(inputNodes: List[InputNode]): Tree = {
 
-    def resolveNode(i: Int, level: Int): Option[Node] =
-      if (i == -1)
-        None
-      else
-        Some(Node(i, None, None, level))
+    def resolveValue(i: Int): Option[Int] =
+      if (i == -1) None
+      else Some(i)
+
+
+    def buildNode(parent: Int, children: InputNode, depth: Int): Option[Node] = {
+      resolveValue(parent)
+        .map { parentValue =>
+          val leftNode = resolveValue(children.leftChildIndex).map(i => Node(i, None, None, depth + 1))
+          val rightNode = resolveValue(children.rightChildIndex).map(i => Node(i, None, None, depth + 1))
+          Node(parentValue, leftNode, rightNode, depth)
+        }
+    }
+
+    def buildLevel(levelsParents: List[InputNode], levelsChildren: List[InputNode], depth: Int): List[Node] = {
+      if ( levelsParents.size != levelsChildren.size) {
+        throw new RuntimeException("pattern being used to build tree is wrong.")
+      } else {
+        val children =
+        levelsParents.zip(levelsChildren)
+          .flatMap{ case (parent, children) =>
+            val leftChild = buildNode(parent.leftChildIndex,children, depth)
+            val rightChild = buildNode(parent.rightChildIndex,children, depth)
+            List(leftChild, rightChild).flatten
+          }
+          children
+      }
+    }
+
+    def buildLevelOne(parent: InputNode, leftChild: InputNode, rightChild: InputNode): List[Node] = {
+      val depth = 1
+      val leftParent = buildNode(parent.leftChildIndex, leftChild, depth)
+      val rightParent = buildNode(parent.rightChildIndex, rightChild, depth)
+      List(leftParent, rightParent).flatten
+    }
 
     @tailrec
     def r(nodes: List[InputNode], level: Int, result: List[Node]): List[Node] = {
-      nodes match {
-        case Nil =>
-          result
-        case values =>
-          val numOfNodes = pow(2, level - 1).toInt
-          result
-            .partition(_.depth == level - 1) match {
-            case (parentNodes, otherNodes) =>
-              val nextNodes: List[Node] =
-                values
-                  .take(numOfNodes)
-                  .zipWithIndex
-                  .flatMap { case (in, index) =>
-                    val leftNode: Option[Node] = resolveNode(in.leftChildIndex, level)
-                    val rightNode: Option[Node] = resolveNode(in.rightChildIndex, level)
-                    val nextParent: Option[Node] =
-                      parentNodes
-                        .lift(index) match {
-                          case None =>
-                            None
-                          case Some(node) =>
-                            Some(node.copy(left = leftNode, right = rightNode))
-                        }
-                    List(nextParent, leftNode, rightNode)
-                  }.flatten
-              r(nodes.drop(numOfNodes), level + 1, otherNodes ++ nextNodes)
+      level match {
+        case 1 =>
+          nodes match {
+            case Nil =>
+              List(Node(1, None, None, 1))
+            case h :: Nil =>
+              val updatedRoot = buildNode(1, h, 0).get
+              r(nodes.drop(1), level + 1, List(updatedRoot))
+            case h :: tail =>
+              val updatedRoot = buildNode(1, h, 0).get
+              val levelOneNodes = buildLevelOne(h, tail.head, tail.tail.head)
+              r(nodes.drop(1), level + 1, updatedRoot :: levelOneNodes)
           }
+        case depth =>
+          val numOfNodesForDepth = level * 2
+          val nodesForDepth: List[InputNode] = nodes.take(numOfNodesForDepth)
 
-
+          if ( nodesForDepth.forall(in => in.leftChildIndex == -1 && in.rightChildIndex == -1) ) {
+            val nodesWithNoChildren: List[Node] =
+              result
+                .takeRight(nodesForDepth.size)
+                .flatMap{ node =>
+                  List(node.left, node.right)
+                    .flatten
+                }
+              result ++ nodesWithNoChildren
+          } else {
+            val parentsAndChildren: (List[InputNode], List[InputNode]) = nodesForDepth.splitAt(level)
+            val depthsParents: List[InputNode] = parentsAndChildren._1
+            val depthsChildren: List[InputNode] = parentsAndChildren._2
+            val nodesForLevel = buildLevel(depthsParents, depthsChildren, depth)
+            r(nodes.drop(numOfNodesForDepth), level + 1, result ++ nodesForLevel )
+          }
       }
-
-
     }
 
     Tree(
-      nodes = r(inputNodes, 1, List(Node(1, None, None, 0)))
+      nodes = r(inputNodes, 1, Nil)
     )
   }
 
