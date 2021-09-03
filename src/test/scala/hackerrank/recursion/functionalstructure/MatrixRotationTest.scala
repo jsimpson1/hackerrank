@@ -4,6 +4,8 @@ import hackerrank.recursion.functionalstructures.{MatrixRotation, MatrixRotation
 import hackerrank.recursion.functionalstructures.MatrixRotation.model._
 import org.scalatest.funsuite.AnyFunSuite
 
+import scala.io.{BufferedSource, Source}
+
 class MatrixRotationTest extends AnyFunSuite {
 
   test("case0 rotate 1") {
@@ -125,6 +127,23 @@ class MatrixRotationTest extends AnyFunSuite {
     val input = MatrixRotation.parseInput(MatrixRotationInputs.case3)
     val actual = input._1.rotate(input._2).toString
     val expected = MatrixRotationInputs.case3Result
+    assertResult(expected)(actual)
+  }
+
+  test("case 9") {
+
+    val inputFile = "/Users/flow/code/jeremy/hackerrank/test_cases/matrixRotationCase9.txt"
+
+    val inputFromFile = Source.fromFile(inputFile)
+
+    val input = MatrixRotation.parseInput(inputFromFile.mkString)
+
+    val expectedFromFile = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/matrixRotationCase9Result.txt")
+
+    val expected: String = expectedFromFile.mkString
+
+    val actual: String = input._1.rotate(input._2).toString
+
     assertResult(expected)(actual)
   }
 

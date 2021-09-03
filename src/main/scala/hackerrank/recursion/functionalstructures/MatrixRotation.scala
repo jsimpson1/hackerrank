@@ -38,7 +38,7 @@ object MatrixRotation {
             .toIndexedSeq
         }.zipWithIndex
 
-    val cells =
+    val cells: IndexedSeq[Cell] =
       rowValues
         .flatMap{ row =>
           val rowIndex = row._2
