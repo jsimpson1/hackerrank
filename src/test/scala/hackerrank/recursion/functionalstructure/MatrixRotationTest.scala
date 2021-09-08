@@ -8,6 +8,13 @@ import scala.io.{BufferedSource, Source}
 
 class MatrixRotationTest extends AnyFunSuite {
 
+  def printResult(expected: Any, actual: Any): Unit =
+    println(
+      s"""  actual:\n$actual
+         |expected:\n$expected""".stripMargin
+    )
+
+
   test("case0 rotate 1") {
 
     val matrix =
@@ -59,10 +66,7 @@ class MatrixRotationTest extends AnyFunSuite {
 //        assertResult(v._2)(v._1)
 //      }
 
-    println(
-      s""" actual:\n$actual
-         |expected:\n$expected""".stripMargin
-    )
+    printResult(expected, actual)
 
     assertResult(expected.sortedCells)(actual.sortedCells)
   }
@@ -94,10 +98,7 @@ class MatrixRotationTest extends AnyFunSuite {
         assertResult(v._2)(v._1)
       }
 
-    println(
-      s""" actual:\n$actual
-         |expected:\n$expected""".stripMargin
-    )
+    printResult(expected, actual)
 
     assertResult(expected.sortedCells)(actual.sortedCells)
   }
@@ -106,6 +107,7 @@ class MatrixRotationTest extends AnyFunSuite {
     val input = MatrixRotation.parseInput(MatrixRotationInputs.case0)
     val actual = input._1.rotate(input._2).toString
     val expected = MatrixRotationInputs.case0Result
+    printResult(expected, actual)
     assertResult(expected)(actual)
   }
 
@@ -113,6 +115,7 @@ class MatrixRotationTest extends AnyFunSuite {
     val input = MatrixRotation.parseInput(MatrixRotationInputs.case1)
     val actual = input._1.rotate(input._2).toString
     val expected = MatrixRotationInputs.case1Result
+    printResult(expected, actual)
     assertResult(expected)(actual)
   }
 
@@ -120,6 +123,7 @@ class MatrixRotationTest extends AnyFunSuite {
     val input = MatrixRotation.parseInput(MatrixRotationInputs.case2)
     val actual = input._1.rotate(input._2).toString
     val expected = MatrixRotationInputs.case2Result
+    printResult(expected, actual)
     assertResult(expected)(actual)
   }
 
@@ -127,6 +131,7 @@ class MatrixRotationTest extends AnyFunSuite {
     val input = MatrixRotation.parseInput(MatrixRotationInputs.case3)
     val actual = input._1.rotate(input._2).toString
     val expected = MatrixRotationInputs.case3Result
+    printResult(expected, actual)
     assertResult(expected)(actual)
   }
 
@@ -143,7 +148,6 @@ class MatrixRotationTest extends AnyFunSuite {
     val expected: String = expectedFromFile.mkString
 
     val actual: String = input._1.rotate(input._2).toString
-
     assertResult(expected)(actual)
   }
 
