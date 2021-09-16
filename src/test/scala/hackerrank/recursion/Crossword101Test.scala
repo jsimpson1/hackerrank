@@ -2,6 +2,7 @@ package hackerrank.recursion
 
 import hackerrank.recursion.Crosswords101.model._
 import org.scalatest.funsuite.AnyFunSuite
+import scala.collection.JavaConverters._
 
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 
@@ -154,7 +155,7 @@ class Crossword101Test extends AnyFunSuite {
   test("crossword toString 0 ") {
     val input = Crossword101Inputs.test0
     val actual = Crosswords101.parseInput(input).toString
-    val expected = input.lines.take(10).mkString("\n")
+    val expected = input.linesIterator.take(10).mkString("\n")
     println(s"expected: ${expected}")
     assertResult(expected)(actual)
   }
@@ -162,7 +163,7 @@ class Crossword101Test extends AnyFunSuite {
   test("crossword toString") {
     val input = Crossword101Inputs.test1
     val actual = Crosswords101.parseInput(input).toString
-    val expected = input.lines.take(10).mkString("\n")
+    val expected = input.linesIterator.take(10).mkString("\n")
     println(s"expected: ${expected}")
     assertResult(expected)(actual)
   }
