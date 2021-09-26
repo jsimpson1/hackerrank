@@ -10,7 +10,6 @@ import scala.language.implicitConversions
 class OrderExercisesTest extends AnyFunSuite {
 
   val printResults = true
-//  val printResults = false
 
   def printResults[A](expected: A, actual: A): Unit = {
     if ( printResults )
@@ -19,12 +18,6 @@ class OrderExercisesTest extends AnyFunSuite {
            |actual   = $actual""".stripMargin
       )
   }
-
-  def pairToValue(v: (Int,Int)): Value =
-    Value(v._1, v._2)
-
-  implicit def pairsToValues(v: List[(Int, Int)]): List[Value] =
-    v.map(pairToValue)
 
   def emptyValue: Int = 0
 
@@ -209,33 +202,13 @@ class OrderExercisesTest extends AnyFunSuite {
 
     val segmentedTree: SegmentedTree[Int] = SegmentedTree.build[Int](arr, emptyValue)
 
-    val actual: Option[SubArray] = calMaxSumSubArray(segmentedTree, Nil)
+    val actual = calMaxSumSubArray(segmentedTree, 0, arr.size - 1)
 
-    val expected: Option[SubArray] = Some(SubArray(7, 2, 6))
+    val expected = SubArray(7, 2, 6)
 
     assertResult(expected)(actual)
 
   }
-
-  test("calMaxSum ignored") {
-
-    val arr = List(-2, -3, 4, -1, -2, 1, 5, -3)
-
-    val segmentedTree: SegmentedTree[Int] = SegmentedTree.build[Int](arr, emptyValue)
-
-    val expected: Option[SubArray] = None
-
-    val actual0: Option[SubArray] = calMaxSumSubArray(segmentedTree, List(SubArray(0, 0, 7)))
-    assert(actual0 == expected)
-
-    val actual1: Option[SubArray] = calMaxSumSubArray(segmentedTree, List(SubArray(0,0,2), SubArray(0, 3, 7)))
-    assert(actual1 == expected)
-
-    val actual2: Option[SubArray] = calMaxSumSubArray(segmentedTree, List(SubArray(0,0,1), SubArray(0, 2, 3), SubArray(0,4, 5), SubArray(0, 6, 7)))
-    assert(actual2 == expected)
-
-  }
-
 
   test("case 0") {
     val inputStr = """5 3
@@ -335,7 +308,7 @@ class OrderExercisesTest extends AnyFunSuite {
     assertResult(expected)(actual)
   }
 
-  ignore("case 16") {
+  test("case 16") {
     val inputStr: String = {
       val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase16.txt")
       s.mkString
@@ -349,7 +322,7 @@ class OrderExercisesTest extends AnyFunSuite {
         .split("\n")
         .map(_.toInt)
         .toList
-    } ++ List(136, 126, 99, 93, 53, 49, 49)
+    }
 
 //    printResults(expected, actual)
 
