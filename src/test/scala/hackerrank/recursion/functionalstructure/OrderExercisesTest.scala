@@ -1,5 +1,7 @@
 package hackerrank.recursion.functionalstructure
 
+import hackerrank.recursion.functionalstructures.model._
+
 import hackerrank.recursion.functionalstructures.OrderExercises._
 import hackerrank.recursion.functionalstructures.OrderExercises.model._
 import org.scalatest.funsuite.AnyFunSuite
