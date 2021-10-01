@@ -1,5 +1,7 @@
 package hackerrank.recursion.geometry
 
+import hackerrank.functionalprogramming.geometry.{Line, Point}
+
 object CovextHullDemo extends App {
 
   //  val line = Line(Point(8,555), Point(29, 682))

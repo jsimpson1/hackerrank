@@ -1,5 +1,6 @@
 package hackerrank.recursion.geometry
 
+import hackerrank.functionalprogramming.geometry.{ConcaveInputs, ConcavePolygon, ConvexHullInputs, Polygon}
 import org.scalatest.funsuite.AnyFunSuite
 
 class ConcavePolygonTest extends AnyFunSuite {

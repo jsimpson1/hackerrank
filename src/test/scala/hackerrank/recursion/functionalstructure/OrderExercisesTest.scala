@@ -1,9 +1,8 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.model._
-
-import hackerrank.recursion.functionalstructures.OrderExercises._
-import hackerrank.recursion.functionalstructures.OrderExercises.model._
+import hackerrank.functionalprogramming.functionalstructures.OrderExercises._
+import hackerrank.functionalprogramming.functionalstructures.OrderExercises.model._
+import hackerrank.functionalprogramming.functionalstructures.model.{Leaf, Node, SegmentedTree}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.io.Source

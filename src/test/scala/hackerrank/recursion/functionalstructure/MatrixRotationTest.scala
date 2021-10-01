@@ -1,7 +1,7 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.{MatrixRotation, MatrixRotationInputs}
-import hackerrank.recursion.functionalstructures.MatrixRotation.model._
+import hackerrank.functionalprogramming.functionalstructures.MatrixRotation.model._
+import hackerrank.functionalprogramming.functionalstructures.{MatrixRotation, MatrixRotationInputs}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.io.{BufferedSource, Source}

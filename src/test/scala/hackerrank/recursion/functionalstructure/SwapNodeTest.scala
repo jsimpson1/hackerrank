@@ -1,7 +1,7 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.{SwapNodeInputs, SwapNodes}
-import hackerrank.recursion.functionalstructures.SwapNodes.model._
+import hackerrank.functionalprogramming.functionalstructures.{SwapNodeInputs, SwapNodes}
+import hackerrank.functionalprogramming.functionalstructures.SwapNodes.model._
 import org.scalatest.funsuite.AnyFunSuite
 
 class SwapNodeTest extends AnyFunSuite {

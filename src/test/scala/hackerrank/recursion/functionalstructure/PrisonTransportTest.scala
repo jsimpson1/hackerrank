@@ -1,8 +1,8 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.PrisonTransport
-import hackerrank.recursion.functionalstructures.PrisonTransport.model
-import hackerrank.recursion.functionalstructures.PrisonTransport.model.Bus
+import hackerrank.functionalprogramming.functionalstructures.PrisonTransport
+import PrisonTransport.model
+import PrisonTransport.model.Bus
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.io.Source

@@ -1,5 +1,6 @@
 package hackerrank.demo
 
+import hackerrank.functionalprogramming.demo.BubbleSort
 import org.scalatest.funsuite.AnyFunSuite
 
 class BubbleSortTest extends AnyFunSuite {

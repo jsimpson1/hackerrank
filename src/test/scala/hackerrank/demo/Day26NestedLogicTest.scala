@@ -1,6 +1,6 @@
 package hackerrank.demo
 
-import hackerrank.demo.Day26NestedLogic._
+import hackerrank.functionalprogramming.demo.Day26NestedLogic._
 import org.scalatest.funsuite.AnyFunSuite
 
 class Day26NestedLogicTest extends AnyFunSuite {

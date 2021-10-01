@@ -1,6 +1,7 @@
 package hackerrank.recursion.chess
 
-import hackerrank.recursion.chess.model._
+import hackerrank.functionalprogramming.chess.PlaceSuperQueens
+import hackerrank.functionalprogramming.chess.model._
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.math.Ordering.Implicits.seqDerivedOrdering

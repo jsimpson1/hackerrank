@@ -1,6 +1,6 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.ValidBinarySearchTree
+import hackerrank.functionalprogramming.functionalstructures.ValidBinarySearchTree
 import org.scalatest.funsuite.AnyFunSuite
 
 class ValidBinaryTreeTest extends AnyFunSuite {

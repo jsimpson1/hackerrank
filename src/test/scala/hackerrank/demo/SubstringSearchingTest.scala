@@ -1,5 +1,6 @@
 package hackerrank.demo
 
+import hackerrank.functionalprogramming.demo.{SubstringSearchInput, SubstringSearching}
 import org.scalatest.funsuite.AnyFunSuite
 
 class SubstringSearchingTest extends AnyFunSuite {

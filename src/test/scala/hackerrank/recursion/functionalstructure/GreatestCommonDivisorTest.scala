@@ -1,6 +1,6 @@
 package hackerrank.recursion.functionalstructure
 
-import hackerrank.recursion.functionalstructures.GreatestCommonDivisor
+import hackerrank.functionalprogramming.functionalstructures.GreatestCommonDivisor
 import org.scalatest.funsuite.AnyFunSuite
 
 class GreatestCommonDivisorTest extends AnyFunSuite{

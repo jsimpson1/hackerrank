@@ -1,9 +1,10 @@
 package hackerrank.recursion
 
-import hackerrank.recursion.Crosswords101.model._
+import hackerrank.functionalprogramming.{Crossword101Inputs, Crosswords101}
+import hackerrank.functionalprogramming.Crosswords101.model._
 import org.scalatest.funsuite.AnyFunSuite
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 
 class Crossword101Test extends AnyFunSuite {

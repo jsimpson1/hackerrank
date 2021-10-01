@@ -1,8 +1,7 @@
 package hackerrank.demo
 
+import hackerrank.functionalprogramming.demo.Fibonacci
 import org.scalatest.funsuite.AnyFunSuite
-
-import scala.math._
 
 class FibonacciTest extends AnyFunSuite {
 
