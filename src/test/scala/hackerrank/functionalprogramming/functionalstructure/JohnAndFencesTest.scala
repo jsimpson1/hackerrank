@@ -1,32 +1,34 @@
 package hackerrank.functionalprogramming.functionalstructure
 
 import hackerrank.functionalprogramming.functionalstructures.JohnAndFences
+import hackerrank.functionalprogramming.functionalstructures.data.JohnAndFenceInputs
 import org.scalatest.funsuite.AnyFunSuite
+
 import scala.io.Source
 
 class JohnAndFencesTest extends AnyFunSuite {
 
   val case0 = Vector(2, 5, 7, 4, 1, 8)
 
-  test("calcAreaToLeft case 0") {
+  test("calcNumOfFencesToLeft case 0") {
 
-    assert(JohnAndFences.calcAreaToLeft(case0, 0) == 2)
-    assert(JohnAndFences.calcAreaToLeft(case0, 1) == 5)
-    assert(JohnAndFences.calcAreaToLeft(case0, 2) == 7)
-    assert(JohnAndFences.calcAreaToLeft(case0, 3) == 12)
-    assert(JohnAndFences.calcAreaToLeft(case0, 4) == 5)
-    assert(JohnAndFences.calcAreaToLeft(case0, 5) == 8)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 0) == 1)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 1) == 1)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 2) == 1)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 3) == 3)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 4) == 5)
+    assert(JohnAndFences.calcNumOfFencesToLeftInclusive(case0, 5) == 1)
 
   }
 
-  test("calcAreaToRight case 0") {
+  test("calcNumOfFencesToRight case 0") {
 
-    assert(JohnAndFences.calcAreaToRight(case0, 0) == 8)
-    assert(JohnAndFences.calcAreaToRight(case0, 1) == 10)
-    assert(JohnAndFences.calcAreaToRight(case0, 2) == 7)
-    assert(JohnAndFences.calcAreaToRight(case0, 3) == 4)
-    assert(JohnAndFences.calcAreaToRight(case0, 4) == 2)
-    assert(JohnAndFences.calcAreaToRight(case0, 5) == 8)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 0) == 4)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 1) == 2)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 2) == 1)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 3) == 1)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 4) == 2)
+    assert(JohnAndFences.calcNumOfFencesToRightInclusive(case0, 5) == 1)
 
   }
 
@@ -40,30 +42,80 @@ class JohnAndFencesTest extends AnyFunSuite {
     assertResult(12)(actual)
   }
 
-//  test("calcMaxInteriorRectangleArea case 1") {
+//  test("case 1 reduced vector size") {
 //
-//    val heights: Vector[Int] = ""
+//    val targetValue = 5789
 //
-//    val actual = JohnAndFences.calcAreaToRight()
+//    val heights: Vector[Int] = Vector(
+//      1039,
+//      6639,
+//      5775,
+//      1030,
+//      3198,
+//      7441,
+//      targetValue,
+//      6425,
+//      8665,
+//      6108,
+//      8099,
+//      9411,
+//      3814,
+//      8616,
+//      989
+//    )
+//
+//    val actualLeft = JohnAndFences.calcNumOfFencesToLeft(heights, 6)
+//
+//    assert(actualLeft == targetValue * 2)
+//
+//    val actualRight = JohnAndFences.calcNumOfFencesToRight(heights, 6)
+//
+//    assert(actualRight == targetValue * 6)
+//
+//    val solutionValue = 40523
+//
+//    assert((actualRight + actualLeft - 1) == solutionValue)
+//
+//  }
+//
+//  test("calcMaxInteriorRectangleArea case 1 left and right check") {
+//
+//    val heights: Vector[Int] = JohnAndFenceInputs.case1Heights
+//
+//    val index = 46
+//
+////    val actualLeft = JohnAndFences.calcAreaToLeft(heights, index)
+////
+////    assert(actualLeft == 6425)
+//
+//    val actualRight = JohnAndFences.calcNumOfFencesToRight(heights, index)
+//
+//    assert(actualRight == 40523)
 //
 //  }
 
   test("calcMaxInteriorRectangleArea case 1") {
 
-    val inputStr = """100
-                     |1370 4873 2981 478 4760 5191 6872 6665 3327 3106 9828 9991 208 1667 8408 6876 4872 320 1675 747 7706 4165 1579 2988 1126 2093 1313 5300 2111 6948 6838 9833 1821 6171 310 2932 7713 3533 9596 1039 6639 5775 1030 3198 7441 5789 6425 8665 6108 8099 9411 3814 8616 989 6801 9741 9433 4465 5040 1544 1412 8230 7728 3232 4400 4389 2515 8464 7922 8463 9503 912 589 532 461 4382 6320 6885 3046 2427 1335 8808 2592 6302 6149 5744 6043 5581 208 7434 3476 1620 2015 7555 1203 2766 1944 3718 1230 6217""".stripMargin
+    val inputStr = JohnAndFenceInputs.case1
 
     val actual: Int = JohnAndFences.calcMaxRectangleArea(inputStr)
 
     assertResult(40523)(actual)
   }
 
+
+  test("calcMaxInteriorRectangleArea case 2") {
+
+    val inputStr = JohnAndFenceInputs.case2
+
+    val actual: Int = JohnAndFences.calcMaxRectangleArea(inputStr)
+
+    assertResult(50216)(actual)
+  }
+
   test("calcMaxInteriorRectangleArea case 4") {
 
-    val inputStr = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/johnAndFencesTestcase4.txt")
-      s.mkString
-    }
+    val inputStr = JohnAndFenceInputs.case4
 
     val actual: Int = JohnAndFences.calcMaxRectangleArea(inputStr)
 

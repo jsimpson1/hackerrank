@@ -1,5 +1,7 @@
 package hackerrank.functionalprogramming.recursion.chess
 
+import hackerrank.functionalprogramming.recursion.chess.model._
+
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.math.abs

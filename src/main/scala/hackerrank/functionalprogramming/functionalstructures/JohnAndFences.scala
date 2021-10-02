@@ -38,7 +38,7 @@ object JohnAndFences {
     }
   }
 
-  def calcArea(
+  def calcNumberOfFences(
     heights: Vector[Int],
     startIndex: Int,
     indexIncrementFn: Int => Int,
@@ -60,15 +60,11 @@ object JohnAndFences {
           r(indexIncrementFn(index), result + 1)
         }
       }
-      val numOfFences = r(startIndex, 0)
-
-      val area = numOfFences * initialHeight
-//      println(s"calcArea -- index: $startIndex area =$area. numOfFences = $numOfFences, initialHeight=$initialHeight")
-      area
+      r(startIndex, 0)
     }
   }
 
-  def calcAreaToLeft(
+  def calcNumOfFencesToLeftInclusive(
     heights: Vector[Int],
     startIndex: Int,
   ): Int = {
@@ -80,10 +76,10 @@ object JohnAndFences {
     ): Boolean =
       currentIndex < 0 || heights(currentIndex) < heights(startIndex)
 
-    calcArea(heights, startIndex, _ - 1, leftEndCondition)
+    calcNumberOfFences(heights, startIndex, _ - 1, leftEndCondition)
   }
 
-  def calcAreaToRight(
+  def calcNumOfFencesToRightInclusive(
     heights: Vector[Int],
     startIndex: Int,
   ): Int = {
@@ -95,7 +91,7 @@ object JohnAndFences {
     ): Boolean =
       currentIndex > heights.size - 1 || heights(currentIndex) < heights(startIndex)
 
-    calcArea(heights, startIndex, _ + 1, rightEndCondition)
+    calcNumberOfFences(heights, startIndex, _ + 1, rightEndCondition)
   }
 
 
@@ -104,7 +100,6 @@ object JohnAndFences {
 
   def calcMaxRectangleArea(input: Input): Int = {
 
-    // TODO refactor out
     lazy val heights: Vector[Int] = input.heights
 
     @tailrec
@@ -112,11 +107,10 @@ object JohnAndFences {
       if ( index > heights.size - 1 ) {
         result
       } else {
-        val leftArea = calcAreaToLeft(heights, index)
-        val rightArea = calcAreaToRight(heights, index)
-        val maxLeftOrRight = max(leftArea, rightArea)
-        val nextResult = if ( maxLeftOrRight > result ) maxLeftOrRight else result
-        println(s"calcMaxInteriorRectangleArea -- index:$index, result=$result, maxLeftOrRight=$maxLeftOrRight, leftArea=$leftArea, rightArea=$rightArea, ")
+        val leftFences = calcNumOfFencesToLeftInclusive(heights, index)
+        val rightFences = calcNumOfFencesToRightInclusive(heights, index)
+        val area = (leftFences+ rightFences - 1) * heights(index)
+        val nextResult = if ( area > result ) area else result
         r(index + 1, nextResult)
       }
     }

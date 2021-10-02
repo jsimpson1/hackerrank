@@ -418,16 +418,13 @@ object Crosswords101 {
 
   def solveCrossword(crossword: Crossword): Crossword = {
     crossword
-      .or
-      ds match {
-        case Nil =>
-          crossword
-        case words =>
-          val sortedWords = s
-        ength(words)
-          crossword.
-    placeWords(sortedWords)
-      }
+      .originalWords match {
+      case Nil =>
+        crossword
+      case words =>
+        val sortedWords = sortWordsByLength(words)
+        crossword.placeWords(sortedWords)
+    }
   }
 
 
