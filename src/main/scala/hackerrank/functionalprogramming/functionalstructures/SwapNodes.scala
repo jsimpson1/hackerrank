@@ -6,7 +6,7 @@ import scala.math.{Ordered, pow}
 object SwapNodes {
 
   import model._
-  import SwapNodeInputs._
+  import hackerrank.functionalprogramming.functionalstructures.data.SwapNodeInputs._
 
   def main(args: Array[String]): Unit = {
 

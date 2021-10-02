@@ -1,5 +1,7 @@
 package hackerrank.functionalprogramming.functionalstructures
 
+import hackerrank.functionalprogramming.functionalstructures.data.MatrixRotationInputs
+
 import scala.annotation.tailrec
 
 object MatrixRotation {
