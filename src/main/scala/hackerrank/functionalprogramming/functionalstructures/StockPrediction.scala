@@ -29,29 +29,66 @@ object StockPrediction {
 
   }
 
-  def calcLengthOfSubArray(input: Input): List[Int] =
+    def calcLengthOfSubArray(input: Input): List[Int] =
     input.queries.map { query =>
       calcLengthOfSubArray(input.prices, query)
     }
 
 
-  def calcLengthOfSubArray(prices: Array[Int], query: Query): Int = {
+//  def calcLengthOfSubArray(originalPrices: Array[Int], query: Query): Int = {
+//
+//    val margin = query.margin
+//    val minValue = originalPrices.apply(query.startIndex)
+//    val maxValue = minValue + margin
+//
+//    def satisfiesConditions(value: Int): Boolean = {
+//      minValue <= value && value <= maxValue
+//    }
+//
+//    @tailrec
+//    def r(index: Int, indexIncrementFn: Int => Int, currentMax: Int, resultMax: Int): Int = {
+//
+//      if ( index < 0 || index > originalPrices.length - 1) {
+//        resultMax
+//      } else {
+//        val price = originalPrices(index)
+//        if ( satisfiesConditions(price) ) {
+//          val nextCurrentMax = currentMax + 1
+//          val nextMax = if ( nextCurrentMax > resultMax ) nextCurrentMax else resultMax
+//          r(indexIncrementFn(index), indexIncrementFn, nextCurrentMax, nextMax)
+//        } else {
+//          resultMax
+//        }
+//      }
+//    }
+//
+//    val initialMax = 0
+//
+//    val left = r(query.startIndex, _ - 1, initialMax, initialMax)
+//    val right = r(query.startIndex, _ + 1,  initialMax, initialMax)
+//    val result = left + right - 1
+//    result
+//  }
+
+  def calcLengthOfSubArray(originalPrices: Array[Int], query: Query): Int = {
 
     val margin = query.margin
-    val minimumValue = prices.apply(query.startIndex)
-    val maxValue = minimumValue + margin
+    val minValue = originalPrices.apply(query.startIndex)
+    val maxValue = minValue + margin
 
     def satisfiesConditions(value: Int): Boolean = {
-      minimumValue <= value && value <= maxValue
+      minValue <= value && value <= maxValue
     }
+
+    lazy val preProcessed = PerProcessedPrices.runLengthEncoding(originalPrices, query.startIndex, margin, -1)
 
     @tailrec
     def r(index: Int, indexIncrementFn: Int => Int, currentMax: Int, resultMax: Int): Int = {
 
-      if ( index < 0 || index > prices.size - 1) {
+      if ( index < 0 || index > preProcessed.prices.length - 1) {
         resultMax
       } else {
-        val price = prices(index)
+        val price = preProcessed.prices(index)
         if ( satisfiesConditions(price) ) {
           val nextCurrentMax = currentMax + 1
           val nextMax = if ( nextCurrentMax > resultMax ) nextCurrentMax else resultMax
@@ -64,13 +101,15 @@ object StockPrediction {
 
     val initialMax = 0
 
-    val right = r(query.startIndex, _ + 1,  initialMax, initialMax)
-    val left = r(query.startIndex, _ - 1, initialMax, initialMax)
+    val left = r(preProcessed.startIndex, _ - 1, initialMax, initialMax)
+    val right = r(preProcessed.startIndex, _ + 1,  initialMax, initialMax)
     val result = left + right - 1
     result
   }
 
   object model {
+
+    case class QueryResult(index: Int, value: Int)
 
     object Input {
 
@@ -103,11 +142,75 @@ object StockPrediction {
 
     }
 
+    object PerProcessedPrices {
+
+      def runLengthEncoding(
+        originalPrices: Array[Int],
+        originalStartIndex: Int,
+        margin: Int,
+        compressionValue: Int,
+      ): PerProcessedPrices = {
+
+        if ( originalPrices.isEmpty ) {
+          PerProcessedPrices(originalPrices.toList, originalStartIndex, compressionValue)
+        } else {
+
+          val minValue = originalPrices.apply(originalStartIndex)
+          val maxValue = minValue + margin
+
+          def isIndexBeforeOriginalStart(index: Int): Boolean = index < originalStartIndex
+
+          @tailrec
+          def r(prices:  List[(Int, Int)], resultPrices: Queue[Int], pricesDroppedBeforeStartIndex: Int): PerProcessedPrices = {
+            prices match {
+              case Nil =>
+                val updatedStartIndex = originalStartIndex - pricesDroppedBeforeStartIndex
+                PerProcessedPrices(resultPrices.toList, updatedStartIndex, compressionValue)
+              case h :: tail =>
+                val value = h._1
+                val index = h._2
+                if ( value < minValue || value > maxValue) {
+                  val (pricesToDrop: List[(Int, Int)], remainingPrices: List[(Int, Int)]) =
+                    tail
+                      .span(v =>
+                        v._1 < minValue || v._1 > maxValue
+                      )
+                  val nextPricesDropped: Int =
+                    if ( isIndexBeforeOriginalStart(index) ) {
+                      pricesDroppedBeforeStartIndex + pricesToDrop.length
+                    } else {
+                      pricesDroppedBeforeStartIndex
+                    }
+
+                  r(remainingPrices, resultPrices.enqueue(compressionValue), nextPricesDropped)
+                } else {
+                  r(tail, resultPrices.enqueue(value), pricesDroppedBeforeStartIndex )
+                }
+
+            }
+          }
+
+          r(originalPrices.toList.zipWithIndex, Queue(), 0)
+        }
+      }
+
+    }
+
+    case class ProcessedPrices(prices: List[Int], numOfElemDropped: Int, compressionValue: Int)
+
+    case class PerProcessedPrices(prices: List[Int], startIndex: Int, compressionValue: Int)
+
     case class Input(
       lengthOfPrices: Int,
       prices: Array[Int],
       numOfQueries: Int,
       queries: List[Query],
+    )
+
+    case class QueryOptimization(
+      index: Int,
+      query: Query,
+      value: Int
     )
 
     case class Query(

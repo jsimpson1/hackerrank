@@ -1,14 +1,112 @@
 package hackerrank.functionalprogramming.functionalstructure
 
 import hackerrank.functionalprogramming.functionalstructures.StockPrediction
-import hackerrank.functionalprogramming.functionalstructures.StockPrediction.model.Query
 import hackerrank.functionalprogramming.functionalstructures.data.StockPredictionInputs
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.immutable.TreeMap
-import scala.io.{BufferedSource, Source}
 
 class StockPredictionTest extends AnyFunSuite {
+
+
+  test("runLengthEncoding simple test zero index") {
+
+    val prices = Array(1,2,3,4)
+
+    val startIndex = 0
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(1,2,3,-1), 0, compressionValue)
+
+    assert(actual == expected)
+
+  }
+
+  test("runLengthEncoding all valid") {
+
+    val prices = Array(1,1,1,1)
+
+    val startIndex = 2
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(1,1,1,1), 2, compressionValue)
+
+    assert(actual == expected)
+  }
+
+  test("runLengthEncoding empty") {
+
+    val prices: Array[Int] = Array()
+
+    val startIndex = 0
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(), 0, compressionValue)
+
+    assert(actual == expected)
+  }
+
+  test("runLengthEncoding simple test") {
+
+    val prices = Array(1,2,3,4,5,6,1,3)
+
+    val startIndex = 2
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(-1,3,4,5,-1,3), 1, compressionValue)
+
+    assert(actual == expected)
+
+  }
+
+  test("runLengthEncoding simple test 2") {
+
+    val prices = Array(1,1,5,1,2,3,4,5,6,1,3)
+
+    val startIndex = 5
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(-1,5,-1,3,4,5,-1,3), 3, compressionValue)
+
+    assert(actual == expected)
+
+  }
+
+  test("runLengthEncoding simple test 3") {
+
+    val prices = Array(1,1,1,1,5,1,2,3,4,5,6,1,3)
+
+    val startIndex = 7
+    val margin = 2
+
+    val compressionValue = -1
+
+    val actual = StockPrediction.model.PerProcessedPrices.runLengthEncoding(prices,startIndex, margin, compressionValue)
+
+    val expected = StockPrediction.model.PerProcessedPrices(List(-1,5,-1,3,4,5,-1,3), 3, compressionValue)
+
+    assert(actual == expected)
+
+  }
 
   test("case 0 - query1") {
 
@@ -151,7 +249,7 @@ class StockPredictionTest extends AnyFunSuite {
       .foreach { case (query, index) =>
         val actual = StockPrediction.calcLengthOfSubArray(input.prices, query)
         val expected = expectedValues(index)
-//        println(s"index=$index")
+//        println(s"index=$index/${expectedValues.length - 1}")
         assert(actual == expected)
       }
 
@@ -196,6 +294,5 @@ class StockPredictionTest extends AnyFunSuite {
       }
 
   }
-
 
 }
