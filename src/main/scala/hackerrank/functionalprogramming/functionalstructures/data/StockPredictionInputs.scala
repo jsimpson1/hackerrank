@@ -63,4 +63,18 @@ object StockPredictionInputs {
       .toList
   }
 
+  val case11: String = {
+    val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/stockPredictionsCase11.txt")
+    s.mkString
+  }
+
+  lazy val case11Results: List[Int] = {
+    val bs: BufferedSource = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/stockPredictionsCase11Result.txt")
+    bs
+      .mkString
+      .split("\n")
+      .map(_.toInt)
+      .toList
+  }
+
 }

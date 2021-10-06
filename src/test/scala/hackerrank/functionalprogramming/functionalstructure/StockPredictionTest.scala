@@ -177,5 +177,25 @@ class StockPredictionTest extends AnyFunSuite {
 
   }
 
+  test("case 11") {
+
+    val inputStr: String = StockPredictionInputs.case11
+
+    val input = StockPrediction.model.Input.parse(inputStr)
+
+    val expectedValues = StockPredictionInputs.case11Results
+
+    input
+      .queries
+      .zipWithIndex
+      .foreach { case (query, index) =>
+        val actual = StockPrediction.calcLengthOfSubArray(input.prices, query)
+        val expected = expectedValues(index)
+        //        println(s"index=$index")
+        assert(actual == expected)
+      }
+
+  }
+
 
 }
