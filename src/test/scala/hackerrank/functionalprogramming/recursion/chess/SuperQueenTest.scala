@@ -1,6 +1,5 @@
 package hackerrank.functionalprogramming.recursion.chess
 
-import hackerrank.functionalprogramming.recursion.chess.PlaceSuperQueens
 import hackerrank.functionalprogramming.recursion.chess.model._
 import org.scalatest.funsuite.AnyFunSuite
 

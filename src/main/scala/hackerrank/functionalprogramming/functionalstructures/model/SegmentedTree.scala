@@ -63,7 +63,7 @@ object SegmentedTree {
     }
 
   def build[T](
-    values: List[T],
+    values: Seq[T],
     emptyValue: T,
   )(
     implicit
@@ -73,7 +73,7 @@ object SegmentedTree {
     @tailrec
     def r(
       root: SegmentedTree[T],
-      values: List[(T, Int)]
+      values: Seq[(T, Int)]
     ): SegmentedTree[T] = {
       values match {
         case Nil =>

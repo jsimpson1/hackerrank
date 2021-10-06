@@ -1,6 +1,5 @@
 package hackerrank.functionalprogramming.recursion.geometry
 
-import hackerrank.functionalprogramming.recursion.geometry.{Line, Point}
 
 object CovextHullDemo extends App {
 

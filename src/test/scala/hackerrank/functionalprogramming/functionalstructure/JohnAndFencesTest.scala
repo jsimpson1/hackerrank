@@ -42,58 +42,6 @@ class JohnAndFencesTest extends AnyFunSuite {
     assertResult(12)(actual)
   }
 
-//  test("case 1 reduced vector size") {
-//
-//    val targetValue = 5789
-//
-//    val heights: Vector[Int] = Vector(
-//      1039,
-//      6639,
-//      5775,
-//      1030,
-//      3198,
-//      7441,
-//      targetValue,
-//      6425,
-//      8665,
-//      6108,
-//      8099,
-//      9411,
-//      3814,
-//      8616,
-//      989
-//    )
-//
-//    val actualLeft = JohnAndFences.calcNumOfFencesToLeft(heights, 6)
-//
-//    assert(actualLeft == targetValue * 2)
-//
-//    val actualRight = JohnAndFences.calcNumOfFencesToRight(heights, 6)
-//
-//    assert(actualRight == targetValue * 6)
-//
-//    val solutionValue = 40523
-//
-//    assert((actualRight + actualLeft - 1) == solutionValue)
-//
-//  }
-//
-//  test("calcMaxInteriorRectangleArea case 1 left and right check") {
-//
-//    val heights: Vector[Int] = JohnAndFenceInputs.case1Heights
-//
-//    val index = 46
-//
-////    val actualLeft = JohnAndFences.calcAreaToLeft(heights, index)
-////
-////    assert(actualLeft == 6425)
-//
-//    val actualRight = JohnAndFences.calcNumOfFencesToRight(heights, index)
-//
-//    assert(actualRight == 40523)
-//
-//  }
-
   test("calcMaxInteriorRectangleArea case 1") {
 
     val inputStr = JohnAndFenceInputs.case1
