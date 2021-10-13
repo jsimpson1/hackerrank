@@ -1,22 +1,51 @@
 package hackerrank.functionalprogramming.functionalstructure.model
 
-import hackerrank.functionalprogramming.functionalstructures.StockPrediction.model.MinMax
-import hackerrank.functionalprogramming.functionalstructures.model.{Indexes, SqrtDecomposition}
+import hackerrank.functionalprogramming.functionalstructures.model.{Indexes, SqrtDecomposition, SqrtDecompositionValue}
 import org.scalatest.funsuite.AnyFunSuite
 
 class SqrtDecompositionTest extends AnyFunSuite {
+
+  case class MinMax(min: Int, max: Int) {
+
+    def isInside(value: Int): Boolean =
+      value >= min && value <= max
+
+    def isInside(limit: MinMax): Boolean =
+      min >= limit.min && max <= limit.max
+
+    def combine(other: MinMax): MinMax =
+      MinMax(
+        scala.math.min(min, other.min),
+        scala.math.max(max, other.max)
+      )
+
+  }
+
+  implicit val minMaxValue: SqrtDecompositionValue[MinMax] = new SqrtDecompositionValue[MinMax] {
+
+    override def apply(i: Int): MinMax =
+      MinMax(i, i)
+
+    override def makeBlock(l: Array[Int]): MinMax =
+      MinMax(l.min, l.max)
+
+    override def aggregate(a: MinMax, b: MinMax): MinMax =
+      MinMax(
+        scala.math.min(a.min, b.min),
+        scala.math.max(a.max, b.max)
+      )
+  }
 
   def sqrtDecompositionTest[I,E](input: I, expected: E)(implicit fn: I => E): Unit = {
     assert((input, fn(input)) == (input, expected))
   }
 
-  import hackerrank.functionalprogramming.functionalstructures.StockPrediction.minMaxValue
 
   test("SqrtDecomposition -- partialBlockCalc") {
 
     val data = SqrtDecomposition(Array(3,5,2,6,1))
 
-    val actual = data.partialBlockCalc((0 to 2).toList)
+    val actual: Option[MinMax] = data.partialBlockCalc((0 to 2).toList)
 
     val expected =  Some(MinMax(2,5))
 
