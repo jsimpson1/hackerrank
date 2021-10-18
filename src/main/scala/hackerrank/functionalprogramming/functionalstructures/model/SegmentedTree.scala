@@ -5,6 +5,13 @@ import scala.annotation.tailrec
 abstract class SegmentedTree[T] {
   def value: T
   def maxIndex: Int
+
+  def update(index: Int, value: T): SegmentedTree[T]
+
+  def query(index: Int): T
+
+  def query(l: Int, r: Int): T
+
 }
 
 object SegmentedTree {
@@ -63,7 +70,7 @@ object SegmentedTree {
     }
 
   def build[T](
-    values: Seq[T],
+    values: List[T],
     emptyValue: T,
   )(
     implicit
@@ -73,7 +80,7 @@ object SegmentedTree {
     @tailrec
     def r(
       root: SegmentedTree[T],
-      values: Seq[(T, Int)]
+      values: List[(T, Int)]
     ): SegmentedTree[T] = {
       values match {
         case Nil =>
@@ -105,6 +112,9 @@ object SegmentedTree {
     leftIndex: Int,
     rightIndex: Int,
     value: T,
+  )(
+    implicit
+    partialFn: (T, T) => T,
   ): SegmentedTree[T] = {
     if ( leftIndex != rightIndex ) {
       Node(
@@ -129,11 +139,20 @@ object SegmentedTree {
 
   def query[T](
     root: SegmentedTree[T],
+    index: Int,
+  )(
+    implicit
+    partialFn: (T, T) => T,
+  ): T =
+    query(root, index, index)
+
+  def query[T](
+    root: SegmentedTree[T],
     l: Int,
     r: Int,
   )(
     implicit
-    partialFn: (T, T) => T,
+      partialFn: (T, T) => T,
   ): T =
     root match {
       case Leaf(_, value) =>
@@ -171,13 +190,51 @@ case class Node[T](
   value: T,
   leftChild: SegmentedTree[T],
   rightChild: SegmentedTree[T],
-) extends SegmentedTree[T] {
+)(
+  implicit
+    partialFn: (T, T) => T,
+)extends SegmentedTree[T] {
+
   override def maxIndex: Int = rightIndex
+
+  override def update(index: Int, value: T
+  ): SegmentedTree[T] =
+    SegmentedTree
+      .update(this, index, value)
+
+  override def query(index: Int): T =
+    SegmentedTree
+      .query(this, index)
+
+
+  override def query(l: Int, r: Int): T =
+    SegmentedTree
+      .query(this, l, r)
+
 }
 
 case class Leaf[T](
   index: Int,
   value: T
+)(
+  implicit
+  partialFn: (T, T) => T,
 ) extends SegmentedTree[T] {
+
   override def maxIndex: Int = index
+
+  override def update(index: Int, value: T
+  ): SegmentedTree[T] =
+    SegmentedTree
+      .update(this, index, value)
+
+  override def query(index: Int): T =
+    SegmentedTree
+      .query(this, index)
+
+
+  override def query(l: Int, r: Int): T =
+    SegmentedTree
+      .query(this, l, r)
+
 }

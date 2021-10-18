@@ -1,6 +1,6 @@
 package hackerrank.functionalprogramming.functionalstructures
 
-import hackerrank.functionalprogramming.functionalstructures.model.{SegmentedTree, SqrtDecomposition, SqrtDecompositionValue}
+import hackerrank.functionalprogramming.functionalstructures.model.{SegmentedTree, _}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -21,66 +21,128 @@ object StockPrediction {
 
     println(s"input=$input")
 
-    val results = calcLengthOfSubArray(input)
+    val results = solve(input)
 
     println(results)
 
   }
 
-
-  implicit val minMaxValue: SqrtDecompositionValue[MinMax] = new SqrtDecompositionValue[MinMax] {
-
-    override def apply(i: Int): MinMax =
-      MinMax(i, i)
-
-    override def makeBlock(l: Array[Int]): MinMax =
-      MinMax(l.min, l.max)
-
-    override def aggregate(a: MinMax, b: MinMax): MinMax =
-      MinMax(
-        scala.math.min(a.min, b.min),
-        scala.math.max(a.max, b.max)
-      )
+  def solve(input: Input): List[Int] = {
+    val blocks = createBlocks(input)
+    input.queries.map{ query =>
+      solveQuery(query, input.prices, blocks)
+    }
   }
 
-  def calcLengthOfSubArray(input: Input): List[Int] = {
+  def numberOfBlocks(lengthOfPrices: Int, blockSize: Int): Int =
+    if (lengthOfPrices % blockSize != 0)
+      lengthOfPrices / blockSize + 1
+    else
+      lengthOfPrices / blockSize
 
-    val preProcessedPrices: SqrtDecomposition[MinMax] =
-      SqrtDecomposition(input.prices)
-
-    input
-      .queries
-      .map { query =>
-        calcLengthOfSubArray(preProcessedPrices, query)
-      }
+  def createBlocks(input: Input): Array[Node] = {
+    val blockSize = Math.sqrt(input.lengthOfPrices).toInt
+    val numOfBlocks = numberOfBlocks(input.lengthOfPrices, blockSize)
+    buildBlocks(input.prices, blockSize, numOfBlocks)
   }
 
-  implicit def indexValue(i: Index): Int = i.value
+  def buildBlocks(values: Array[Int], blockSize: Int, numberOfBlocks: Int): Array[Node] = {
 
-  def calcLengthOfSubArray(preProcessPrices: SqrtDecomposition[MinMax], query: Query): Int = {
-
-    val minValue = preProcessPrices.values(query.startIndex)
-    val maxValue = minValue + query.margin
-
-    val queryLimit = MinMax(minValue, maxValue)
+    val lengthOfPrices = values.length
 
     @tailrec
-    def r(startIndex: Index, endIndex: Index, result: Int): Int = {
-      preProcessPrices
-        .query(startIndex, endIndex) match {
-          case None =>
-            result
-          case Some(value) =>
-            if ( value.isInside(queryLimit) ) {
-              r(startIndex.next, endIndex.next, result + 1)
-            } else {
-              result
-            }
-        }
+    def r(current: Int, result: List[Node]): List[Node] = {
+      if (current == numberOfBlocks) {
+        result
+      } else {
+        val left = blockSize * current
+        val right = Math.min(lengthOfPrices, left + blockSize)
+        val minValue =
+          (left until right)
+            .foldLeft(Int.MaxValue)((cur, idx) =>
+              Math.min(cur, values(idx))
+            )
+        val maxValue =
+          (left until right)
+            .foldLeft(Int.MinValue)((cur, idx) =>
+              Math.max(cur, values(idx))
+            )
+
+        r(
+          current + 1,
+          result.+:(Node(left, right, minValue, maxValue))
+        )
+      }
     }
-    val left = r(Index(query.startIndex - 1, -1), Index(query.startIndex), 0)
-    val right = r(Index(query.startIndex), Index(query.startIndex + 1, 1), 0)
-    left + right + 1
+    r(0, List[Node]()).reverse.toArray
+  }
+
+  def resolveIndex(queryStartIndex: Int, blocks: Array[Node]): Int =  {
+    var index = -1
+    for (i <- blocks.indices) {
+      if ( blocks(i).leftIndex <= queryStartIndex && blocks(i).rightIndex > queryStartIndex ) {
+        index = i
+      }
+    }
+    index
+  }
+
+  def solveQuery(query: Query, prices: Array[Int], blocks: Array[Node]): Int = {
+
+    val minValue = prices(query.startIndex)
+    val maxValue = minValue + query.margin
+
+    @tailrec
+    def resolvedBlocksValue(currentIndex: Int, increment: Int, result: Int): Int = {
+      if (currentIndex < 0 || currentIndex >= blocks.length) {
+        result
+      } else if (blocks(currentIndex).minValue >= minValue && blocks(currentIndex).maxValue <= maxValue) {
+        resolvedBlocksValue(currentIndex + increment, increment, result + blocks(currentIndex).rightIndex - blocks(currentIndex).leftIndex)
+      } else {
+        val fi = if (increment == 1) blocks(currentIndex).leftIndex else blocks(currentIndex).rightIndex - 1
+        var ret = result
+        var i = fi
+        while (true) {
+          if (prices(i) < minValue || prices(i) > maxValue) {
+            return ret
+          }
+          ret += 1
+          i += increment
+        }
+        -1
+      }
+    }
+
+    val index = resolveIndex(query.startIndex, blocks)
+
+    val lp: Seq[Int] =
+      (blocks(index).leftIndex until query.startIndex)
+        .reverse
+        .takeWhile(i =>
+          prices(i) >= minValue && prices(i) <= maxValue
+        )
+
+    val rp =
+      (query.startIndex + 1 until blocks(index).rightIndex)
+        .takeWhile(i =>
+          prices(i) >= minValue && prices(i) <= maxValue
+        )
+
+    val leftBlocks =
+      if (lp.length == query.startIndex - blocks(index).leftIndex)
+        resolvedBlocksValue(index - 1, -1, 0)
+      else
+        0
+
+    val rightBlocks =
+      if (rp.length == blocks(index).rightIndex - query.startIndex - 1)
+        resolvedBlocksValue(index + 1, 1, 0)
+      else
+        0
+
+    val result =  1 + lp.length + rp.length + leftBlocks + rightBlocks
+
+    result
   }
 
   object model {
@@ -116,40 +178,6 @@ object StockPrediction {
 
     }
 
-    object MinMax {
-
-      def apply(value: Int): MinMax =
-        MinMax(value, value)
-
-    }
-
-    case class MinMax(min: Int, max: Int) {
-
-      def isInside(value: Int): Boolean =
-        value >= min && value <= max
-
-      def isInside(limit: MinMax): Boolean =
-        min >= limit.min && max <= limit.max
-
-      def combine(other: MinMax): MinMax =
-        MinMax(
-          scala.math.min(min, other.min),
-          scala.math.max(max, other.max)
-        )
-
-    }
-
-    object Index {
-
-      def apply(i: Int): Index =
-        Index(i, 0)
-
-    }
-
-    case class Index(value: Int, increment: Int) {
-      def next: Index = Index(value + increment, increment)
-    }
-
     case class Input(
       lengthOfPrices: Int,
       prices: Array[Int],
@@ -157,10 +185,11 @@ object StockPrediction {
       queries: List[Query],
     )
 
-    case class QueryOptimization(
-      index: Int,
-      query: Query,
-      value: Int
+    case class Node(
+      leftIndex: Int,
+      rightIndex: Int,
+      minValue: Int,
+      maxValue: Int
     )
 
     case class Query(

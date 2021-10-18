@@ -1,7 +1,6 @@
 package hackerrank.functionalprogramming.functionalstructure
 
 import hackerrank.functionalprogramming.functionalstructures.PrisonTransport
-import PrisonTransport.model
 import PrisonTransport.model.Bus
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -28,7 +27,7 @@ class PrisonTransportTest extends AnyFunSuite {
                      |1 2
                      |1 4""".stripMargin
 
-    val actual: IndexedSeq[model.Bus] = PrisonTransport.calcBuses(inputStr).sorted
+    val actual: IndexedSeq[Bus] = PrisonTransport.calcBuses(inputStr).sorted
 
     val expected = IndexedSeq(
       Bus(1),
