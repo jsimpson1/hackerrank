@@ -48,7 +48,7 @@ object FightingArmies {
     List.range(0, q).flatMap { _ =>
       val event = readLine.split(" ").map(_.toInt)
       Event.processEvent(command, event)
-    }.toList
+    }
   }
 
   def solve(input: Input): List[Int] = {
