@@ -1,6 +1,7 @@
 package hackerrank.functionalprogramming.functionalstructures
 
-import scala.collection.immutable.HashMap
+import scala.annotation.tailrec
+import scala.collection.immutable.{HashMap, TreeMap}
 
 object MirkoAtTheConstructionSite {
 
@@ -35,48 +36,97 @@ object MirkoAtTheConstructionSite {
   def solve(str: String): List[Int] =
     solve(Input.parse(str))
 
+  def printStepsWithTime(context: String): Unit = {
+
+    import java.time._
+
+    println(s"solve -- ${LocalDateTime.now()} $context")
+  }
+
   def solve(input: Input): List[Int] = {
+
+
     val maxDay = input.dayQueries.max
 
-    val buildings: Array[Building] = Building.createBuildings(input)
+    val buildings: List[Building] =
+      Building
+        .createBuildings(input)
+        .groupBy(_.dailyFloorIncrement)
+        .map { case (_, buildings) =>
+          buildings
+            .maxBy(_.initialHeight)
+        }
+        .toList
+        .sortBy(_.index)
 
-    val dayToBuildings: HashMap[Int, Array[Building]] = dayToBuildingsMap(maxDay, buildings)
+
+    val dayToIndex: TreeMap[Int, Int] = dayToMaxHeightIndex(maxDay, buildings)
 
     input
       .dayQueries
       .map{ day =>
-        val buildingsOfTheDay: Array[Building] = dayToBuildings
+        dayToIndex
           .getOrElse(day, throw new Throwable(s"day=$day not found in dayToBuildings"))
-
-        val maxHeight: Int =
-          buildingsOfTheDay
-            .map(_.currentHeight)
-            .max
-
-        buildingsOfTheDay
-          .filter(_.currentHeight == maxHeight)
-          .map(_.index).max
-
       }
       .toList
   }
 
-  def dayToBuildingsMap(maxDay: Int, buildings: Array[Building]): HashMap[Int, Array[Building]] = {
-    (0 to maxDay)
-      .foldLeft(HashMap[Int, Array[Building]]()) { (map: HashMap[Int, Array[Building]] , dayNum: Int) =>
-        val nextBuildings: Array[Building] = {
-          buildings
-            .map { building =>
-              building
-                .copy(
-                  currentHeight = building.initialHeight + (dayNum * building.dailyFloorIncrement)
-                )
-            }
+  case class Result(height: Int, index: Int)
 
-        }
-        map.+((dayNum, nextBuildings))
-      }
+  @tailrec
+  def getHighestBuildingMaxIndex(numOfDays: Int, buildings: List[Building], result: Result): Int = {
+    buildings match {
+      case Nil =>
+        result.index
+      case h :: tail =>
+        val height: Int = h.initialHeight + (numOfDays * h.dailyFloorIncrement)
+        val nextResult: Result =
+          if (height >= result.height && h.index > result.index ) {
+            Result(height, h.index)
+          } else {
+            result
+          }
+        getHighestBuildingMaxIndex(numOfDays, tail, nextResult)
+    }
   }
+
+  def dayToMaxHeightIndex(maxDay: Int, buildings: List[Building]): TreeMap[Int, Int] = {
+
+    val lastDayMaxIndex: Int = getHighestBuildingMaxIndex(maxDay, buildings, Result(0, 0))
+
+    (0 to maxDay)
+      .foldLeft(
+        DayToMaxHeightIndexTemp(
+          TreeMap[Int, Int](),
+          doShortcut = false
+        )
+      ){ (result, dayNum) =>
+
+        if ( result.doShortcut ) {
+          result
+            .copy(
+              map = result.map.+((dayNum, lastDayMaxIndex))
+            )
+        } else {
+          val maxIndex = getHighestBuildingMaxIndex(dayNum, buildings, Result(0, 0))
+          if ( maxIndex == lastDayMaxIndex ) {
+            result.copy(
+              map = result.map.+((dayNum, maxIndex)),
+              doShortcut = true
+            )
+          } else {
+            result.copy(
+              map = result.map.+((dayNum, maxIndex)),
+            )
+          }
+        }
+      }.map
+  }
+
+  case class DayToMaxHeightIndexTemp(
+    map: TreeMap[Int, Int],
+    doShortcut: Boolean
+  )
 
   object model {
 
@@ -120,17 +170,16 @@ object MirkoAtTheConstructionSite {
 
     object Building {
 
-      def createBuildings(input: Input): Array[Building] = {
+      def createBuildings(input: Input): List[Building] = {
         (0 until input.numOfBuildings)
           .map { index =>
             val height = input.initialFloorHeights(index)
             Building(
               index + 1,
               height,
-              height,
               input.numOfFloorsPerDay(index)
             )
-          }.toArray
+          }.toList
       }
 
     }
@@ -138,7 +187,6 @@ object MirkoAtTheConstructionSite {
     case class Building(
       index: Int,
       initialHeight: Int,
-      currentHeight: Int,
       dailyFloorIncrement: Int,
     )
 
