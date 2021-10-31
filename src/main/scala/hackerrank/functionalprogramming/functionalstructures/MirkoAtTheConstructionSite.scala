@@ -60,15 +60,16 @@ object MirkoAtTheConstructionSite {
         .sortBy(_.index)
 
 
-    val dayToIndex: TreeMap[Int, Int] = dayToMaxHeightIndex(maxDay, buildings)
-
     input
       .dayQueries
       .map{ day =>
-        dayToIndex
-          .getOrElse(day, throw new Throwable(s"day=$day not found in dayToBuildings"))
+        getHighestBuildingMaxIndex(day, buildings, Result.initial)
       }
       .toList
+  }
+
+  object Result {
+    def initial: Result = Result(0,0)
   }
 
   case class Result(height: Int, index: Int)
@@ -89,44 +90,6 @@ object MirkoAtTheConstructionSite {
         getHighestBuildingMaxIndex(numOfDays, tail, nextResult)
     }
   }
-
-  def dayToMaxHeightIndex(maxDay: Int, buildings: List[Building]): TreeMap[Int, Int] = {
-
-    val lastDayMaxIndex: Int = getHighestBuildingMaxIndex(maxDay, buildings, Result(0, 0))
-
-    (0 to maxDay)
-      .foldLeft(
-        DayToMaxHeightIndexTemp(
-          TreeMap[Int, Int](),
-          doShortcut = false
-        )
-      ){ (result, dayNum) =>
-
-        if ( result.doShortcut ) {
-          result
-            .copy(
-              map = result.map.+((dayNum, lastDayMaxIndex))
-            )
-        } else {
-          val maxIndex = getHighestBuildingMaxIndex(dayNum, buildings, Result(0, 0))
-          if ( maxIndex == lastDayMaxIndex ) {
-            result.copy(
-              map = result.map.+((dayNum, maxIndex)),
-              doShortcut = true
-            )
-          } else {
-            result.copy(
-              map = result.map.+((dayNum, maxIndex)),
-            )
-          }
-        }
-      }.map
-  }
-
-  case class DayToMaxHeightIndexTemp(
-    map: TreeMap[Int, Int],
-    doShortcut: Boolean
-  )
 
   object model {
 
