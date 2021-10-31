@@ -45,13 +45,10 @@ object MirkoAtTheConstructionSite {
 
   def solve(input: Input): List[Int] = {
 
-
-    val maxDay = input.dayQueries.max
-
     val buildings: List[Building] =
       Building
         .createBuildings(input)
-        .groupBy(_.dailyFloorIncrement)
+        .groupBy(_.growthRate)
         .map { case (_, buildings) =>
           buildings
             .maxBy(_.initialHeight)
@@ -68,30 +65,30 @@ object MirkoAtTheConstructionSite {
       .toList
   }
 
-  object Result {
-    def initial: Result = Result(0,0)
-  }
-
-  case class Result(height: Int, index: Int)
-
   @tailrec
-  def getHighestBuildingMaxIndex(numOfDays: Int, buildings: List[Building], result: Result): Int = {
+  def getHighestBuildingMaxIndex(day: Int, buildings: List[Building], result: Result): Int = {
     buildings match {
       case Nil =>
         result.index
       case h :: tail =>
-        val height: Int = h.initialHeight + (numOfDays * h.dailyFloorIncrement)
+        val height: Int = h.height(day)
         val nextResult: Result =
           if (height >= result.height && h.index > result.index ) {
             Result(height, h.index)
           } else {
             result
           }
-        getHighestBuildingMaxIndex(numOfDays, tail, nextResult)
+        getHighestBuildingMaxIndex(day, tail, nextResult)
     }
   }
 
   object model {
+
+    object Result {
+      def initial: Result = Result(0,0)
+    }
+
+    case class Result(height: Int, index: Int)
 
     object Input {
 
@@ -150,8 +147,12 @@ object MirkoAtTheConstructionSite {
     case class Building(
       index: Int,
       initialHeight: Int,
-      dailyFloorIncrement: Int,
-    )
+      growthRate: Int,
+    ) {
+
+      def height(day: Int): Int = initialHeight + (day * growthRate)
+
+    }
 
     case class Input(
       n: Int,
