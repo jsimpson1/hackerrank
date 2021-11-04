@@ -1,5 +1,6 @@
 package hackerrank.functionalprogramming.functionalstructure
 
+
 import hackerrank.functionalprogramming.functionalstructures.OrderExercises._
 import hackerrank.functionalprogramming.functionalstructures.OrderExercises.model._
 import hackerrank.functionalprogramming.functionalstructures.model.{Leaf, Node, SegmentedTree}
@@ -10,7 +11,30 @@ import scala.language.implicitConversions
 
 class OrderExercisesTest extends AnyFunSuite {
 
+  import hackerrank.functionalprogramming.FileTestCase.FunctionalStructureTestFiles._
+
   val printResults = true
+
+  def doCaseTest(caseNum: Int): Unit = {
+    val inputStr: String = fileContents(s"orderExercisesCase${caseNum}.txt")
+
+    val actual = calcSubArrays(parseInput(inputStr)).sortedResult
+
+    val expected: List[Int] = {
+      fileContents(s"orderExercisesCase${caseNum}Result.txt")
+        .split("\n")
+        .map(_.toInt)
+        .toList
+    }
+
+    //    printResults(expected, actual)
+
+    //    println(s"actual diff expected ${actual.diff(expected)}")
+    //
+    //    println(s"expected diff actual ${expected.diff(actual)}")
+
+    assertResult(expected)(actual)
+  }
 
   def printResults[A](expected: A, actual: A): Unit = {
     if ( printResults )
@@ -265,73 +289,15 @@ class OrderExercisesTest extends AnyFunSuite {
   }
 
   test("case 6") {
-    val inputStr: String = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase6.txt")
-      s.mkString
-    }
-
-    val actual = calcSubArrays(parseInput(inputStr)).sortedResult
-    val expected: List[Int] = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase6Result.txt")
-      s
-        .mkString
-        .split("\n")
-        .map(_.toInt)
-        .toList
-    }
-
-    printResults(expected, actual)
-
-    assertResult(expected)(actual)
+    doCaseTest(6)
   }
 
   test("case 7") {
-    val inputStr: String = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase7.txt")
-      s.mkString
-    }
-
-    val expected: List[Int] = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase7Result.txt")
-      s
-        .mkString
-        .split("\n")
-        .map(_.toInt)
-        .toList
-    }
-
-  val actual = calcSubArrays(parseInput(inputStr)).sortedResult
-
-//    println(s"actual diff expected ${actual.diff(expected)}")
-//
-//    println(s"expected diff actual ${expected.diff(actual)}")
-
-    assertResult(expected)(actual)
+    doCaseTest(7)
   }
 
   test("case 16") {
-    val inputStr: String = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase16.txt")
-      s.mkString
-    }
-
-    val actual = calcSubArrays(parseInput(inputStr)).sortedResult
-    val expected: List[Int] = {
-      val s = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/orderExercisesCase16Result.txt")
-      s
-        .mkString
-        .split("\n")
-        .map(_.toInt)
-        .toList
-    }
-
-//    printResults(expected, actual)
-
-//    println(s"actual diff expected ${actual.diff(expected)}")
-//
-//    println(s"expected diff actual ${expected.diff(actual)}")
-
-    assertResult(expected)(actual)
+    doCaseTest(16)
   }
 
 }

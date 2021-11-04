@@ -8,6 +8,7 @@ import scala.io.Source
 
 class PrisonTransportTest extends AnyFunSuite {
 
+  import hackerrank.functionalprogramming.FileTestCase.FunctionalStructureTestFiles._
 
   test("case 0") {
     val inputStr = """4
@@ -40,11 +41,9 @@ class PrisonTransportTest extends AnyFunSuite {
 
   test("case 9") {
 
-    val file = "/Users/flow/code/jeremy/hackerrank/test_cases/prisonerTransportCase9.txt"
+    val inputStr = fileContents("prisonerTransportCase9.txt")
 
-    val inputStr = Source.fromFile(file)
-
-    val actual: Int = PrisonTransport.calcCost(inputStr.getLines().mkString("\n"))
+    val actual: Int = PrisonTransport.calcCost(inputStr)
 
     assertResult(19160)(actual)
   }

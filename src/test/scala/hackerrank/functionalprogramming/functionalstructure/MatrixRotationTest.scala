@@ -1,19 +1,33 @@
 package hackerrank.functionalprogramming.functionalstructure
 
+
 import hackerrank.functionalprogramming.functionalstructures.MatrixRotation.model._
 import hackerrank.functionalprogramming.functionalstructures.MatrixRotation
 import hackerrank.functionalprogramming.functionalstructures.data.MatrixRotationInputs
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.io.{BufferedSource, Source}
-
 class MatrixRotationTest extends AnyFunSuite {
+
+  import hackerrank.functionalprogramming.FileTestCase.FunctionalStructureTestFiles._
 
   def printResult(expected: Any, actual: Any): Unit =
     println(
       s"""  actual:\n$actual
          |expected:\n$expected""".stripMargin
     )
+
+  def doCaseTest(caseNum: Int): Unit = {
+    val input: (Matrix, Int) =
+      MatrixRotation
+        .parseInput(fileContents(s"matrixRotationCase${caseNum}.txt")
+      )
+
+    val expected: String =
+      fileContents(s"matrixRotationCase${caseNum}Result.txt")
+
+    val actual: String = input._1.rotate(input._2).toString
+    assertResult(expected)(actual)
+  }
 
 
   test("case0 rotate 1") {
@@ -137,19 +151,7 @@ class MatrixRotationTest extends AnyFunSuite {
   }
 
   test("case 9") {
-
-    val inputFile = "/Users/flow/code/jeremy/hackerrank/test_cases/matrixRotationCase9.txt"
-
-    val inputFromFile = Source.fromFile(inputFile)
-
-    val input = MatrixRotation.parseInput(inputFromFile.mkString)
-
-    val expectedFromFile = Source.fromFile("/Users/flow/code/jeremy/hackerrank/test_cases/matrixRotationCase9Result.txt")
-
-    val expected: String = expectedFromFile.mkString
-
-    val actual: String = input._1.rotate(input._2).toString
-    assertResult(expected)(actual)
+    doCaseTest(9)
   }
 
 }

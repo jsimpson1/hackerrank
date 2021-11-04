@@ -1,10 +1,8 @@
 package hackerrank.functionalprogramming.functionalstructure
 
+import hackerrank.functionalprogramming.functionalstructure.data.JohnAndFenceInputs
 import hackerrank.functionalprogramming.functionalstructures.JohnAndFences
-import hackerrank.functionalprogramming.functionalstructures.data.JohnAndFenceInputs
 import org.scalatest.funsuite.AnyFunSuite
-
-import scala.io.Source
 
 class JohnAndFencesTest extends AnyFunSuite {
 

@@ -1,8 +1,8 @@
 package hackerrank.functionalprogramming.functionalstructure
 
+import hackerrank.functionalprogramming.functionalstructure.data.StockPredictionInputs
 import hackerrank.functionalprogramming.functionalstructures.StockPrediction
 import hackerrank.functionalprogramming.functionalstructures.StockPrediction.model._
-import hackerrank.functionalprogramming.functionalstructures.data.StockPredictionInputs
 import org.scalatest.funsuite.AnyFunSuite
 
 
