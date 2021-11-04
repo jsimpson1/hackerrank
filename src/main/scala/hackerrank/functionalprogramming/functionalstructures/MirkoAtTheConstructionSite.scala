@@ -33,36 +33,98 @@ object MirkoAtTheConstructionSite {
       )
   }
 
-  def solve(str: String): List[Int] =
+  def solve(str: String): List[Int] = {
     solve(Input.parse(str))
-
-  def printStepsWithTime(context: String): Unit = {
-
-    import java.time._
-
-    println(s"solve -- ${LocalDateTime.now()} $context")
   }
 
   def solve(input: Input): List[Int] = {
 
-    val buildings: List[Building] =
-      Building
-        .createBuildings(input)
-        .groupBy(_.growthRate)
-        .map { case (_, buildings) =>
-          buildings
-            .maxBy(_.initialHeight)
-        }
-        .toList
-        .sortBy(_.index)
-
+    lazy val buildings: List[Building] = initializeBuildings(input, 4)
 
     input
       .dayQueries
       .map{ day =>
-        getHighestBuildingMaxIndex(day, buildings, Result.initial)
+        getHighestBuildingMaxIndex(day, buildings, Result.empty)
       }
       .toList
+  }
+
+  def reduceNumOfBuildingsByGrowthRate(buildings: List[Building]): List[Building] = {
+    buildings
+      .groupBy(_.growthRate)
+      .map { case (_, buildings) =>
+        buildings
+          .maxBy(_.initialHeight)
+      }.toList
+  }
+
+  def intersection(
+    day: Int,
+    shorterBuilding: Building,
+    tallerBuilding: Building
+  ): Boolean = {
+    shorterBuilding.height(day) >= tallerBuilding.height(day)
+  }
+
+  def reduceNumOfBuildingsByIntersection(day: Int, buildings: List[Building], numOfReductions: Int): List[Building] = {
+
+//    @tailrec
+//    def checkIntersections(building: Building, buildings: List[Building]): (Building, List[Building]) = {
+//      buildings match {
+//        case Nil =>
+//          (building, Nil)
+//        case h :: tail =>
+//          if ( intersection(day, building, h) ) {
+//            checkIntersections(building, tail)
+//          } else {
+//            (building, buildings)
+//          }
+//      }
+//    }
+//
+//    @tailrec
+//    def r(buildings: List[Building], result: List[Building]): List[Building] = {
+//      buildings match {
+//        case Nil =>
+//          result
+//        case h :: tail =>
+//          val intersectionResult = checkIntersections(h, tail)
+//          r(intersectionResult._2, intersectionResult._1 :: result)
+//      }
+//    }
+
+    @tailrec
+    def r(buildings: List[Building], result: List[Building]): List[Building] = {
+      buildings match {
+        case Nil =>
+          result
+        case b0 :: Nil =>
+          b0 :: result
+        case b0 :: b1 :: tail =>
+          if ( intersection(day, b0, b1) ) {
+            r(b1 :: tail, b0 :: result)
+          } else {
+            r(b1 :: tail, result)
+          }
+      }
+    }
+
+    List
+      .range(0, numOfReductions)
+      .foldLeft(buildings){ (acc, _) =>
+        r(acc.sortBy(_.initialHeight), Nil)
+      }
+  }
+
+  def initializeBuildings(input: Input, numOfReductions: Int): List[Building] = {
+    reduceNumOfBuildingsByIntersection(
+      day = input.maxDay,
+      reduceNumOfBuildingsByGrowthRate(
+        Building.createBuildings(input)
+      ),
+      numOfReductions
+    )
+    .sortBy(_.index)
   }
 
   @tailrec
@@ -84,8 +146,34 @@ object MirkoAtTheConstructionSite {
 
   object model {
 
+    object Building {
+
+      def createBuildings(input: Input): List[Building] = {
+        (0 until input.numOfBuildings)
+          .map { index =>
+            val height = input.initialFloorHeights(index)
+            Building(
+              index + 1,
+              height,
+              input.numOfFloorsPerDay(index)
+            )
+          }.toList
+      }
+
+    }
+
+    case class Building(
+      index: Int,
+      initialHeight: Int,
+      growthRate: Int,
+    ) {
+
+      def height(day: Int): Int = initialHeight + (day * growthRate)
+
+    }
+
     object Result {
-      def initial: Result = Result(0,0)
+      def empty: Result = Result(0,0)
     }
 
     case class Result(height: Int, index: Int)
@@ -128,32 +216,6 @@ object MirkoAtTheConstructionSite {
 
     }
 
-    object Building {
-
-      def createBuildings(input: Input): List[Building] = {
-        (0 until input.numOfBuildings)
-          .map { index =>
-            val height = input.initialFloorHeights(index)
-            Building(
-              index + 1,
-              height,
-              input.numOfFloorsPerDay(index)
-            )
-          }.toList
-      }
-
-    }
-
-    case class Building(
-      index: Int,
-      initialHeight: Int,
-      growthRate: Int,
-    ) {
-
-      def height(day: Int): Int = initialHeight + (day * growthRate)
-
-    }
-
     case class Input(
       n: Int,
       q: Int,
@@ -161,6 +223,8 @@ object MirkoAtTheConstructionSite {
       numOfFloorsPerDay: Array[Int],
       dayQueries: Array[Int],
     ) {
+
+      def maxDay: Int = dayQueries.max
 
       def numOfBuildings: Int = n
 
