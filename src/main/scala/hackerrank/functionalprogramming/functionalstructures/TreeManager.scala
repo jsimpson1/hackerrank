@@ -1,284 +1,264 @@
 package hackerrank.functionalprogramming.functionalstructures
 
+import hackerrank.functionalprogramming.functionalstructures.TreeManager.model.Tree
+
+import scala.annotation.tailrec
+import scala.collection.immutable.HashMap
+
 object TreeManager {
 
-  import model._
-
-
-  def main(args: Array[String]): Unit = {
-
-    val inputStr = """11
-                     |change 1
-                     |print
-                     |insert child 2
-                     |visit child 1
-                     |insert right 3
-                     |visit right
-                     |print
-                     |insert right 4
-                     |delete
-                     |visit child 2
-                     |print""".stripMargin
-
-    val input = Input.parse(inputStr)
-
-    println(s"input=$input")
-
-  }
-
-  def solve(str: String): Unit =
-    solve(Input.parse(str))
-
-  def solve(input: Input): Unit = {
-
-//    input
-//      .operations
-//      .foldLeft(Tree.root){ (tree, operation) =>
-//        doOperation(operation, tree)
-//      }
-    ???
-  }
-
-  def doOperation(operation: String, tree: Node): Node = {
-//    operation
-//      .split(" ") match {
-//      case Array(cmd) =>
-//        cmd match {
-//          case "print" =>
-//            tree.print()
-//          case "delete" =>
-//            tree.delete()
-//        }
-//      case Array(cmd, target) =>
-//        cmd match {
-//          case "change" =>
-//            tree.change(target.toInt)
-//          case "visit" =>
-//            target match {
-//              case "left" =>
-//                tree.visitLeft()
-//              case "right" =>
-//                tree.visitRight()
-//              case "parent" =>
-//                tree.visitParent()
-//
-//            }
-//        }
-//      case Array(cmd, target, num) =>
-//        val num0 = num.toInt
-//        cmd match {
-//          case "visit" =>
-//            tree.visitChild(num0)
-//          case "insert" =>
-//            target match {
-//              case "left" =>
-//                tree.insertLeft(num0)
-//              case "right" =>
-//                tree.insertRight(num0)
-//              case "child" =>
-//                tree.insertChild(num0)
-//            }
-//        }
-//    }
-    ???
-  }
-
   object model {
-
-    object Zipper {
-
-      sealed trait MoveResult {
-
-        import MoveResult._
-
-        def get: Zipper = this match {
-          case Success(zipper, _) =>
-            zipper
-          case Failure(_) =>
-            throw new UnsupportedOperationException("failed to move the zipper")
-        }
-
-      }
-
-      object MoveResult {
-        case class Success(zipper: Zipper, origin: Zipper) extends MoveResult
-        case class Failure(origin: Zipper) extends MoveResult
-      }
-
-    }
-
-    trait ExerciseMethods {
-      def print(): Zipper
-      def delete(): Zipper
-      def change(i: Int): Zipper
-      def visitLeft(): Zipper
-      def visitRight(): Zipper
-      def visitParent(): Zipper
-      def visitChild(i: Int): Zipper
-      def insertLeft(i: Int): Zipper
-      def insertRight(i: Int): Zipper
-      def insertChild(i: Int): Zipper
-    }
-
-    case class Zipper(
+    case class Tree(
       left: List[Int],
       focus: Int,
       right: List[Int],
-      up: Option[Zipper]
-    ) extends ExerciseMethods {
+    ) {
 
-      import Zipper._
-
-      def moveTo(z: Zipper): MoveResult = MoveResult.Success(z, this)
-      def fail: MoveResult = MoveResult.Failure(this)
-
-      def tapFocus(f: Int => Unit): Zipper = {
-        f(focus)
-        this
-      }
-
-      def tryMoveLeft: MoveResult = {
-        left match {
-          case h :: tail =>
-            moveTo(
-              copy(
-                left = tail,
-                focus = h,
-                right = focus :: right
-              )
-            )
-          case Nil =>
-            fail
-        }
-      }
-
-      def tryMoveRight: MoveResult = {
-        right match {
-          case h :: tail =>
-            moveTo(
-              copy(
-                right = tail,
-                focus = h,
-                left = focus :: left
-              )
-            )
-          case Nil =>
-            fail
-        }
-      }
-
-      def tryDeleteAndMoveUp: MoveResult = {
-        up
-          .fold(fail){ zipper =>
-            moveTo(
-              zipper.copy(
-                left = left.filterNot(_ == focus),
-                right = right.filterNot(_ == focus),
-              )
-            )
+      def changeFocus(childIndexStartingFromOne: Int): Tree = {
+        val nextTree =
+          (left ::: (focus :: right))
+            .splitAt(childIndexStartingFromOne - 1) match {
+            case (l, r) =>
+              Tree(l, r.head, r.tail)
           }
+        nextTree
       }
 
-      def moveToChild(i: Int): MoveResult = {
-        (left ::: focus :: right) match {
+      def insertRight(value: Int): Tree = {
+        copy(
+          right = value :: right
+        )
+      }
+
+      def insertLeft(value: Int): Tree = {
+        copy(
+          left = left :+ value
+        )
+      }
+
+      def visitRight: Tree = {
+        copy(
+          left = left :+ focus,
+          focus = right.head,
+          right = right.tail
+        )
+      }
+
+      def visitLeft: Tree = {
+        val leftSplit = left.splitAt(left.length - 1)
+        copy(
+          left = leftSplit._1,
+          focus = leftSplit._2.head,
+          right = focus :: right
+        )
+      }
+
+      def delete: Tree = {
+        left ::: right match {
           case Nil =>
-            fail
-          case List(one) =>
-            ???
-          case values =>
-            values
-              .splitAt(i - 1) match {
-                case (l, r) =>
-                  r match {
-                    case Nil =>
-                  l match {
-                    case List(one) =>
-                      ???
-                    case values =>
-                      values
-                        .splitAt(values.length - 1) match {
-                          case (lefts, List(last)) =>
-                            ???
-//                            moveTo(Zipper(l, h, tail, up))
-                        }
-                  }
-                  case h :: tail =>
-                    moveTo(Zipper(l, h, tail, up))
-                }
-              }
+            this
+          case h :: tail =>
+            copy(
+              left = Nil,
+              focus = h,
+              right = tail
+            )
         }
-
-      }
-
-      def print(): Zipper =
-        tapFocus(
-          _ => println(focus)
-        )
-
-      def delete(): Zipper =
-        tryDeleteAndMoveUp
-          .get
-
-      def change(i: Int): Zipper =
-        copy(focus = i)
-
-      def visitLeft(): Zipper =
-        tryMoveLeft
-          .get
-
-      def visitRight(): Zipper =
-        tryMoveRight
-          .get
-
-      def visitParent(): Zipper =
-        tryDeleteAndMoveUp
-          .get
-
-      def visitChild(i: Int): Zipper = {
-        moveToChild(i)
-        ???
-      }
-
-      def insertLeft(i: Int): Zipper =
-        copy(
-          left = i :: left
-        )
-
-      def insertRight(i: Int): Zipper =
-        copy(
-          right = i :: right
-        )
-
-      def insertChild(i: Int): Zipper =
-        copy(
-          left = left :+ i
-        )
-
-    }
-
-
-
-    object Input {
-
-      def parse(str: String): Input = {
-        str
-          .split("\n")
-          .toList match {
-            case h :: tail =>
-              Input(h.toInt, tail)
-            case _ =>
-             throw new RuntimeException("invalid input string")
-          }
       }
 
     }
-
-    case class Input(
-      numOfOperations: Int,
-      operations: List[String]
-    )
-
   }
 
+
+  private def isStringInt(str: String): Boolean = try {
+    str.toInt
+    true
+  } catch {
+    case _: Throwable =>
+      false
+  }
+
+  private def inputToOperations(str: String): List[String] = {
+    str
+      .split("\n")
+      .toList match {
+        case Nil =>
+          Nil
+        case h :: tail =>
+          if ( isStringInt(h) ){
+            tail
+          } else {
+            h :: tail
+          }
+      }
+  }
+
+  private def doOperationOnTree(manager: TreeManager, operation: String): TreeManager = {
+    val parts = operation.split(" ")
+
+    parts match {
+      case Array(cmd) =>
+        cmd match {
+          case "print" =>
+            println(manager.levelToTreeMap(manager.currentLevel).focus)
+            manager
+          case "delete" =>
+            manager.delete
+        }
+      case Array(cmd, value) =>
+        def valueAsInt = value.toInt
+        cmd match {
+          case "change" =>
+            manager.change(manager.currentLevel, valueAsInt)
+          case "visit" =>
+            value match {
+              case "right" =>
+                manager.visitRight
+              case "left"=>
+                manager.visitLeft
+              case "parent" =>
+                manager.visitParent
+            }
+        }
+      case Array(cmd, target, value) =>
+        def valueAsInt = value.toInt
+        cmd match {
+          case "insert" =>
+            target match {
+              case "child" =>
+                manager.insertChild(valueAsInt)
+              case "right" =>
+                manager.insertRight(valueAsInt)
+              case "left" =>
+                manager.insertLeft(valueAsInt)
+            }
+          case "visit" =>
+            target match {
+              case "child" =>
+                manager.visitChild(valueAsInt)
+            }
+          case o =>
+            throw new RuntimeException(s"implement case for ${o.toList}")
+        }
+      case o =>
+        throw new RuntimeException(s"implement case for ${o.toList}")
+    }
+  }
+
+  private def performOperations(root: TreeManager, operations: List[String]): TreeManager = {
+    @tailrec
+    def r(manager: TreeManager, operations: List[String]): TreeManager = {
+      operations match {
+        case Nil =>
+          manager
+        case h :: tail =>
+          val nextManager = doOperationOnTree(manager, h)
+          r(nextManager, tail)
+      }
+    }
+    r(root, operations)
+  }
+
+  def doOperations(inputStr: String): TreeManager = {
+    val rootMap: HashMap[Int, Tree] = HashMap((0, Tree(Nil, 0, Nil)))
+    val manager: TreeManager = TreeManager(0, rootMap)
+    val operations: List[String] = inputToOperations(inputStr)
+    performOperations(manager, operations)
+  }
+
+}
+
+case class TreeManager(
+  currentLevel: Int,
+  levelToTreeMap: HashMap[Int, Tree]
+) {
+
+  def change(level: Int, value: Int): TreeManager = {
+    val updatedTree = levelToTreeMap(level).copy(focus = value)
+    val updatedHashMap = levelToTreeMap.updated(level, updatedTree)
+    val nextManager = copy(levelToTreeMap = updatedHashMap)
+    nextManager
+  }
+
+  def insertChild(value: Int): TreeManager = {
+
+    val childLevel = currentLevel + 1
+
+    val nextChildLevelTree: Tree =
+      levelToTreeMap
+        .get(childLevel) match {
+          case None =>
+            Tree(Nil, value, Nil)
+          case Some(tree) =>
+            tree
+              .copy(
+                left = value :: tree.left
+              )
+      }
+    val nextLevelToTreeMap: HashMap[Int, Tree] = levelToTreeMap.updated(childLevel, nextChildLevelTree)
+    val nextManager = copy(levelToTreeMap = nextLevelToTreeMap)
+    nextManager
+  }
+
+
+  def visitChild(childIndexStartingFromOne: Int): TreeManager = {
+    val childLevel = currentLevel + 1
+    val childIndexFocusedTree: Tree = {
+      val currentChildTree = levelToTreeMap(childLevel)
+      val focusedTree = currentChildTree.changeFocus(childIndexStartingFromOne)
+      focusedTree
+    }
+    val nextLevelToTreeMap = levelToTreeMap.updated(childLevel, childIndexFocusedTree)
+    val nextManager = copy(
+      currentLevel = childLevel,
+      levelToTreeMap = nextLevelToTreeMap
+    )
+    nextManager
+  }
+
+  def insertLeft(value: Int): TreeManager = {
+    val insertToTheLeftTree = levelToTreeMap(currentLevel).insertLeft(value)
+    val nextLevelToTreeMap = levelToTreeMap.updated(currentLevel, insertToTheLeftTree)
+    val nextManager = copy(levelToTreeMap = nextLevelToTreeMap)
+    nextManager
+  }
+
+  def insertRight(value: Int): TreeManager = {
+    val insertToTheRightTree = levelToTreeMap(currentLevel).insertRight(value)
+    val nextLevelToTreeMap = levelToTreeMap.updated(currentLevel, insertToTheRightTree)
+    val nextManager = copy(levelToTreeMap = nextLevelToTreeMap)
+    nextManager
+  }
+
+  def visitRight: TreeManager = {
+    val focusToTheRightTree = levelToTreeMap(currentLevel).visitRight
+    val nextLevelToTreeMap = levelToTreeMap.updated(currentLevel, focusToTheRightTree)
+    val nextManager = copy(levelToTreeMap = nextLevelToTreeMap)
+    nextManager
+  }
+
+  def visitLeft: TreeManager = {
+    val focusToTheLeftTree = levelToTreeMap(currentLevel).visitLeft
+    val nextLevelToTreeMap = levelToTreeMap.updated(currentLevel, focusToTheLeftTree)
+    val nextManager = copy(levelToTreeMap = nextLevelToTreeMap)
+    nextManager
+  }
+
+  def visitParent: TreeManager = {
+    val nextManager = copy(currentLevel = currentLevel - 1)
+    nextManager
+  }
+
+  def delete: TreeManager = {
+    val deleteNextTree: Tree = levelToTreeMap(currentLevel).delete
+    val nextLevelToTreeMap = levelToTreeMap.updated(currentLevel, deleteNextTree)
+    val levelUp = currentLevel - 1
+    val nextManager =
+      copy(
+        currentLevel = levelUp,
+        levelToTreeMap = nextLevelToTreeMap
+      )
+    nextManager
+  }
 
 }
