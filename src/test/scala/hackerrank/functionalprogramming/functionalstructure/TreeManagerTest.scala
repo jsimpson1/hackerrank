@@ -3,7 +3,7 @@ package hackerrank.functionalprogramming.functionalstructure
 import hackerrank.functionalprogramming.functionalstructures.TreeManager
 import org.scalatest.funsuite.AnyFunSuite
 
-class TreeManagerTest extends AnyFunSuite{
+class TreeManagerTest extends AnyFunSuite {
 
   test("case 0") {
 
