@@ -1,32 +1,8 @@
 package hackerrank.functionalprogramming.memoizationanddp
 
-import scala.collection.immutable.HashMap
-
-
-sealed trait RotationDirection {
-  def idChar: Char
-  def rotate(dicePath: DicePath): DicePath
-  def nextRight(i: Int): Int
-  def nextDown(i: Int): Int
-}
-
-case object RotateRight extends RotationDirection {
-  def idChar: Char = 'r'
-  override def rotate(dicePath: DicePath): DicePath = dicePath.rotateRight
-  override def nextRight(i: Int): Int = i - 1
-  override def nextDown(i: Int): Int = i
-}
-
-case object RotateDown extends RotationDirection {
-  override def idChar: Char = 'd'
-  override def rotate(dicePath: DicePath): DicePath = dicePath.rotateDown
-  override def nextRight(i: Int): Int = i
-  override def nextDown(i: Int): Int = i - 1
-}
-
 object DicePath {
 
-  lazy val initialDicePath: DicePath = DicePath("", Dice.initialDice, 1)
+  import model._
 
   def solve(): Unit = {
     val sb = new StringBuilder
@@ -93,71 +69,97 @@ object DicePath {
   }
 
   def sumOfMaximalPath(movesDown: Int, movesRight: Int): Int = {
+    val initialDicePath = model.DicePath("", Dice.initialDice, 1)
     val dicePaths: List[DicePath] = rotateDicePath(initialDicePath, movesRight, movesDown, Nil)
     val sum = dicePaths.map(_.sum).max
     sum
   }
 
-}
+  object model {
 
-case class DicePath(
-  pathId: String,
-  dice: Dice,
-  sum: Int,
-) {
+    case class DicePath(
+      pathId: String,
+      dice: Dice,
+      sum: Int,
+    ) {
 
-  def rotateDown: DicePath = {
-    val nextDice = dice.rotateDown
-    val nextSum = sum + nextDice.top
-    val nextPathId = RotateDown.idChar + pathId
-    val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
-    nextDicePath
-  }
+      def rotateDown: DicePath = {
+        val nextDice = dice.rotateDown
+        val nextSum = sum + nextDice.top
+        val nextPathId = RotateDown.idChar + pathId
+        val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
+        nextDicePath
+      }
 
-  def rotateRight: DicePath = {
-    val nextDice = dice.rotateRight
-    val nextSum = sum + nextDice.top
-    val nextPathId = RotateRight.idChar + pathId
-    val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
-    nextDicePath
-  }
+      def rotateRight: DicePath = {
+        val nextDice = dice.rotateRight
+        val nextSum = sum + nextDice.top
+        val nextPathId = RotateRight.idChar + pathId
+        val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
+        nextDicePath
+      }
 
-}
+    }
 
-object Dice {
+    sealed trait RotationDirection {
+      def idChar: Char
+      def rotate(dicePath: DicePath): DicePath
+      def nextRight(i: Int): Int
+      def nextDown(i: Int): Int
+    }
 
-  lazy val initialDice: Dice =
-    Dice(
-      top = 1,
-      bottom = 6,
-      left = 3,
-      right = 4,
-      front = 2,
-      back = 5
-    )
+    case object RotateRight extends RotationDirection {
+      def idChar: Char = 'r'
+      override def rotate(dicePath: DicePath): DicePath = dicePath.rotateRight
+      override def nextRight(i: Int): Int = i - 1
+      override def nextDown(i: Int): Int = i
+    }
 
-}
+    case object RotateDown extends RotationDirection {
+      override def idChar: Char = 'd'
+      override def rotate(dicePath: DicePath): DicePath = dicePath.rotateDown
+      override def nextRight(i: Int): Int = i
+      override def nextDown(i: Int): Int = i - 1
+    }
 
-case class Dice(top: Int, bottom: Int, left: Int, right: Int, front: Int, back: Int) {
+    object Dice {
 
-  def rotateRight: Dice = {
-    val nextTop = left
-    val nextBottom = right
-    val nextLeft = bottom
-    val nextRight = top
-    val nextFront = front
-    val nextBack = back
-    Dice(nextTop, nextBottom, nextLeft, nextRight, nextFront, nextBack)
-  }
+      lazy val initialDice: Dice =
+        Dice(
+          top = 1,
+          bottom = 6,
+          left = 3,
+          right = 4,
+          front = 2,
+          back = 5
+        )
 
-  def rotateDown: Dice = {
-    val nextTop = back
-    val nextBottom = front
-    val nextLeft = left
-    val nextRight = right
-    val nextFront = top
-    val nextBack = bottom
-    Dice(nextTop, nextBottom, nextLeft, nextRight, nextFront, nextBack)
+    }
+
+    case class Dice(top: Int, bottom: Int, left: Int, right: Int, front: Int, back: Int) {
+
+      def rotateRight: Dice = {
+        val nextTop = left
+        val nextBottom = right
+        val nextLeft = bottom
+        val nextRight = top
+        val nextFront = front
+        val nextBack = back
+        Dice(nextTop, nextBottom, nextLeft, nextRight, nextFront, nextBack)
+      }
+
+      def rotateDown: Dice = {
+        val nextTop = back
+        val nextBottom = front
+        val nextLeft = left
+        val nextRight = right
+        val nextFront = top
+        val nextBack = bottom
+        Dice(nextTop, nextBottom, nextLeft, nextRight, nextFront, nextBack)
+      }
+
+    }
+
   }
 
 }
