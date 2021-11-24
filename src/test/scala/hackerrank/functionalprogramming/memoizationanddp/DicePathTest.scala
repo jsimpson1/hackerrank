@@ -9,66 +9,66 @@ class DicePathTest extends AnyFunSuite {
 
 
   test("sumOfMaximalPath 2 2") {
-    val movesDown = 2
-    val movesRight = 2
+    val mDown = 2
+    val nRight = 2
 
     val expected = 9
-    val actual: Int = DicePath.sumOfMaximalPath(movesDown, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }
 
   test("sumOfMaximalPath 1 2") {
 
-    val down = 1
-    val movesRight = 2
+    val mDown = 1
+    val nRight = 2
 
     val expected = 4
-    val actual: Int = DicePath.sumOfMaximalPath(down, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }
 
   test("sumOfMaximalPath 2 1") {
 
-    val down = 2
-    val movesRight = 1
+    val mDown = 2
+    val nRight = 1
 
     val expected = 6
-    val actual: Int = DicePath.sumOfMaximalPath(down, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }
 
   test("sumOfMaximalPath 3 1") {
 
-    val down = 3
-    val movesRight = 1
+    val mDown = 3
+    val nRight = 1
 
     val expected = 12
-    val actual: Int = DicePath.sumOfMaximalPath(down, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }
 
   test("sumOfMaximalPath 1 3") {
 
-    val down = 1
-    val movesRight = 3
+    val mDown = 1
+    val nRight = 3
 
     val expected = 10
-    val actual: Int = DicePath.sumOfMaximalPath(down, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }
 
   test("sumOfMaximalPath 3 3") {
 
-    val down = 3
-    val movesRight = 3
+    val mDown = 3
+    val nRight = 3
 
     val expected = 19
-    val actual: Int = DicePath.sumOfMaximalPath(down, movesRight)
+    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
 
     assert(actual == expected)
   }

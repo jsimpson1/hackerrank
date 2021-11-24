@@ -4,6 +4,8 @@ object DicePath {
 
   import model._
 
+  val initialDicePath: DicePath = model.DicePath(Dice.initialDice, 1)
+
   def solve(): Unit = {
     val sb = new StringBuilder
 
@@ -38,26 +40,26 @@ object DicePath {
     result.foreach(println)
   }
 
-  private def rotateDicePath(dicePath: DicePath, numOfRight: Int, numOfDown: Int, dicePaths: List[DicePath]): List[DicePath] = {
+  private def rotateDicePath(dicePath: DicePath, mDown: Int, nRight: Int, dicePaths: List[DicePath]): List[DicePath] = {
 
     def doRotation(
       rotationDirection: RotationDirection,
     ): List[DicePath] = {
       rotateDicePath(
         rotationDirection.rotate(dicePath),
-        rotationDirection.nextRight(numOfRight),
-        rotationDirection.nextDown(numOfDown),
+        rotationDirection.nextDown(mDown),
+        rotationDirection.nextRight(nRight),
         dicePaths
       )
     }
 
-    if (numOfRight == 1 && numOfDown == 1) {
+    if (nRight == 1 && mDown == 1) {
       val lastDicePath = dicePath
       val result: List[DicePath] = lastDicePath :: dicePaths
       result
-    } else if ( numOfDown == 1 ) {
+    } else if ( mDown == 1 ) {
       doRotation(RotateRight)
-    } else if (numOfRight == 1){
+    } else if (nRight == 1){
       doRotation(RotateDown)
     } else {
       val right: List[DicePath] =  doRotation(RotateRight)
@@ -68,9 +70,8 @@ object DicePath {
 
   }
 
-  def sumOfMaximalPath(movesDown: Int, movesRight: Int): Int = {
-    val initialDicePath = model.DicePath("", Dice.initialDice, 1)
-    val dicePaths: List[DicePath] = rotateDicePath(initialDicePath, movesRight, movesDown, Nil)
+  def sumOfMaximalPath(mDown: Int, nRight: Int): Int = {
+    val dicePaths: List[DicePath] = rotateDicePath(initialDicePath, mDown, nRight, Nil)
     val sum = dicePaths.map(_.sum).max
     sum
   }
@@ -78,7 +79,6 @@ object DicePath {
   object model {
 
     case class DicePath(
-      pathId: String,
       dice: Dice,
       sum: Int,
     ) {
@@ -86,16 +86,14 @@ object DicePath {
       def rotateDown: DicePath = {
         val nextDice = dice.rotateDown
         val nextSum = sum + nextDice.top
-        val nextPathId = RotateDown.idChar + pathId
-        val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
+        val nextDicePath = DicePath(nextDice, nextSum)
         nextDicePath
       }
 
       def rotateRight: DicePath = {
         val nextDice = dice.rotateRight
         val nextSum = sum + nextDice.top
-        val nextPathId = RotateRight.idChar + pathId
-        val nextDicePath = DicePath(nextPathId, nextDice, nextSum)
+        val nextDicePath = DicePath(nextDice, nextSum)
         nextDicePath
       }
 
