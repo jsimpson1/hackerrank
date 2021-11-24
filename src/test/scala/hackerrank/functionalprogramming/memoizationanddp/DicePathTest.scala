@@ -2,76 +2,34 @@ package hackerrank.functionalprogramming.memoizationanddp
 
 import hackerrank.functionalprogramming.FileTestCase.MemoizationAndDpTestFiles
 import hackerrank.functionalprogramming.TestLoggingCapture._
+import hackerrank.functionalprogramming.memoizationanddp.DicePath.initialDicePath
+import hackerrank.functionalprogramming.memoizationanddp.DicePath.model._
 import org.scalatest.funsuite.AnyFunSuite
+
+import scala.collection.mutable
 
 
 class DicePathTest extends AnyFunSuite {
 
 
-  test("sumOfMaximalPath 2 2") {
-    val mDown = 2
-    val nRight = 2
+  def initialCache: mutable.HashMap[MnKey, Set[DicePath]] = mutable.HashMap(
+    (MnKey(1,1), Set(initialDicePath))
+  )
 
-    val expected = 9
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
+  def sumOfMaximalPathTest(mDown: Int, nRight: Int, expected: Int): Unit = {
+    test(s"sumOfMaximalPath $mDown $nRight") {
+      val key = MnKey(mDown, nRight)
+      val actual: Int = DicePath.sumOfMaximalPath(key, initialCache)
+      assert(actual == expected)
+    }
   }
 
-  test("sumOfMaximalPath 1 2") {
-
-    val mDown = 1
-    val nRight = 2
-
-    val expected = 4
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
-  }
-
-  test("sumOfMaximalPath 2 1") {
-
-    val mDown = 2
-    val nRight = 1
-
-    val expected = 6
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
-  }
-
-  test("sumOfMaximalPath 3 1") {
-
-    val mDown = 3
-    val nRight = 1
-
-    val expected = 12
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
-  }
-
-  test("sumOfMaximalPath 1 3") {
-
-    val mDown = 1
-    val nRight = 3
-
-    val expected = 10
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
-  }
-
-  test("sumOfMaximalPath 3 3") {
-
-    val mDown = 3
-    val nRight = 3
-
-    val expected = 19
-    val actual: Int = DicePath.sumOfMaximalPath(mDown, nRight)
-
-    assert(actual == expected)
-  }
+  sumOfMaximalPathTest(2,2,9)
+  sumOfMaximalPathTest(1,2,4)
+  sumOfMaximalPathTest(2,1,6)
+  sumOfMaximalPathTest(3,1,12)
+  sumOfMaximalPathTest(1,3,10)
+  sumOfMaximalPathTest(3,3,19)
 
   def stringToInt(s: String): Int = s.toInt
 

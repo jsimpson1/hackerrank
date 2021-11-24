@@ -1,5 +1,7 @@
 package hackerrank.functionalprogramming.memoizationanddp
 
+import scala.collection.mutable
+
 object DicePath {
 
   import model._
@@ -24,7 +26,7 @@ object DicePath {
   }
 
   def solveCase(inputStr: String): Unit = {
-    val cases: List[(Int, Int)] =
+    val mnCases: List[MnKey] =
       inputStr
         .split("\n")
         .tail
@@ -33,50 +35,63 @@ object DicePath {
             .split(" ")
             .map(_.toInt) match {
               case Array(m, n) =>
-                (m, n)
+                MnKey(m, n)
             }
         }.toList
-    val result = cases.map(c => sumOfMaximalPath(c._1, c._2))
+    val cache: mutable.HashMap[MnKey, Set[DicePath]] = mutable.HashMap(
+      (MnKey(1,1), Set(initialDicePath))
+    )
+    val result = mnCases.map{ mnCase =>
+      val result = sumOfMaximalPath(mnCase, cache)
+      result
+    }
     result.foreach(println)
   }
 
-  private def rotateDicePath(dicePath: DicePath, mDown: Int, nRight: Int, dicePaths: List[DicePath]): List[DicePath] = {
+  private def rotateDicePath(
+    key: MnKey,
+    cache: mutable.HashMap[MnKey, Set[DicePath]]
+  ) : Set[DicePath] = {
 
-    def doRotation(
-      rotationDirection: RotationDirection,
-    ): List[DicePath] = {
-      rotateDicePath(
-        rotationDirection.rotate(dicePath),
-        rotationDirection.nextDown(mDown),
-        rotationDirection.nextRight(nRight),
-        dicePaths
-      )
-    }
+    lazy val rotateRight = rotateDicePath(key.nextRight, cache).map(_.rotateRight)
 
-    if (nRight == 1 && mDown == 1) {
-      val lastDicePath = dicePath
-      val result: List[DicePath] = lastDicePath :: dicePaths
-      result
-    } else if ( mDown == 1 ) {
-      doRotation(RotateRight)
-    } else if (nRight == 1){
-      doRotation(RotateDown)
+    lazy val rotateDown = rotateDicePath(key.nextDown, cache).map(_.rotateDown)
+
+    if ( cache.contains(key) ) {
+      cache(key)
     } else {
-      val right: List[DicePath] =  doRotation(RotateRight)
-      val down: List[DicePath] = doRotation(RotateDown)
-      val nextPaths: List[DicePath] = down ::: right
-      nextPaths
+      if ( key.mDown == 1 ) {
+        cache(key) = rotateRight
+        cache(key)
+      } else if (key.nRight == 1){
+        cache(key) = rotateDown
+        cache(key)
+      } else {
+        cache(key) = rotateDown ++ rotateRight
+        cache(key)
+      }
     }
 
   }
 
-  def sumOfMaximalPath(mDown: Int, nRight: Int): Int = {
-    val dicePaths: List[DicePath] = rotateDicePath(initialDicePath, mDown, nRight, Nil)
+  def sumOfMaximalPath(
+    key: MnKey,
+    cache: mutable.HashMap[MnKey, Set[DicePath]]
+  ): Int = {
+    val dicePaths = rotateDicePath(key, cache)
     val sum = dicePaths.map(_.sum).max
     sum
   }
 
   object model {
+
+    case class MnKey(mDown: Int, nRight: Int) {
+
+      def nextRight: MnKey = copy(nRight = nRight -1)
+
+      def nextDown: MnKey = copy(mDown = mDown -1)
+
+    }
 
     case class DicePath(
       dice: Dice,
@@ -97,27 +112,6 @@ object DicePath {
         nextDicePath
       }
 
-    }
-
-    sealed trait RotationDirection {
-      def idChar: Char
-      def rotate(dicePath: DicePath): DicePath
-      def nextRight(i: Int): Int
-      def nextDown(i: Int): Int
-    }
-
-    case object RotateRight extends RotationDirection {
-      def idChar: Char = 'r'
-      override def rotate(dicePath: DicePath): DicePath = dicePath.rotateRight
-      override def nextRight(i: Int): Int = i - 1
-      override def nextDown(i: Int): Int = i
-    }
-
-    case object RotateDown extends RotationDirection {
-      override def idChar: Char = 'd'
-      override def rotate(dicePath: DicePath): DicePath = dicePath.rotateDown
-      override def nextRight(i: Int): Int = i
-      override def nextDown(i: Int): Int = i - 1
     }
 
     object Dice {
