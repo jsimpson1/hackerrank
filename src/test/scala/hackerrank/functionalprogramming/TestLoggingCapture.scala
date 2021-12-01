@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 
 object TestLoggingCapture {
 
-  def streamToNodeValues[A](stream: ByteArrayOutputStream, stringToValueFunction: (String) => A): List[A] = {
+  private def streamToNodeValues[A](stream: ByteArrayOutputStream, stringToValueFunction: (String) => A): List[A] = {
     val str = stream.toString
     str match {
       case "" => Nil
@@ -18,6 +18,8 @@ object TestLoggingCapture {
     }
 
   }
+
+  def stringToInt(s: String): Int = s.toInt
 
   def captureLogMessages[A](functionToTest: () => Unit, stringToValueFunction: String => A): List[A] = {
     val stream = new ByteArrayOutputStream()
