@@ -140,8 +140,9 @@ object SherlockAndTheMaze {
     val numOfCases = readInt
     List
       .range(0, numOfCases)
-      .foreach{ line =>
-
+      .foreach{ _ =>
+        val line = readLine
+        println(solveLine(line))
       }
   }
 

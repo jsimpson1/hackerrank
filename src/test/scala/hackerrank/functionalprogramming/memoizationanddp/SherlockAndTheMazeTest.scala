@@ -1,5 +1,6 @@
 package hackerrank.functionalprogramming.memoizationanddp
 
+import hackerrank.functionalprogramming.FileTestCase.MemoizationAndDpTestFiles
 import hackerrank.functionalprogramming.TestLoggingCapture._
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -43,6 +44,23 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
                      |4 4 4""".stripMargin
 
     val expected = List(2,2,18)
+
+    val actual: List[Int] = captureLogMessages(
+      () => SherlockAndTheMaze.solve(inputStr),
+      stringToInt
+    )
+    assert(actual == expected)
+  }
+
+  test("case 1") {
+
+    val inputStr = MemoizationAndDpTestFiles.fileContents("SherlockAndTheMazeCase1.txt")
+
+    val expected =
+      MemoizationAndDpTestFiles
+        .fileContents("SherlockAndTheMazeCase1Result.txt").split("\n")
+        .map(_.toInt)
+        .toList
 
     val actual: List[Int] = captureLogMessages(
       () => SherlockAndTheMaze.solve(inputStr),
