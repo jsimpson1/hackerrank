@@ -2,99 +2,110 @@ package hackerrank.functionalprogramming.memoizationanddp
 
 object SherlockAndTheMaze {
 
-  trait PathDirection
+  case class Square(row: Int, column: Int)
 
-  case object MoveRight extends PathDirection
+  trait MoveDirection {
+    def rowIncrement:Int
+    def columnIncrement:Int
+  }
 
-  case object MoveDown extends PathDirection
+  case object MoveDown extends MoveDirection {
+    override def rowIncrement: Int = 1
+    override def columnIncrement: Int = 0
+  }
+
+  case object MoveRight extends MoveDirection{
+    override def rowIncrement: Int = 0
+    override def columnIncrement: Int = 1
+  }
 
   case class Path(
-    directions: List[PathDirection],
-    lastDirectionChange: Option[PathDirection],
+    square: Square,
+    previous: Option[Square],
     numOfChangesInDirection: Int
   ) {
 
-    private def turn(pathDirection: PathDirection): Path = {
-      val nextDirections = pathDirection :: directions
-      lastDirectionChange match {
-        case None =>
-          copy(nextDirections, Some(pathDirection), 0)
-        case Some(ldc) =>
-          if ( ldc == pathDirection ) {
-            copy(directions = nextDirections)
+    private def move(md: MoveDirection): Path = {
+      val nextSquare =
+        square
+          .copy(
+            row = square.row + md.rowIncrement,
+            column = square.column + md.columnIncrement
+          )
+      val nextPrevious: Option[Square] = Some(square)
+
+      val nextNumOfChangesInDirection: Int = {
+
+        def nextDirectionChange(current: Int, previous: Int): Int = {
+          if ( current - previous > 0 ) {
+            numOfChangesInDirection
           } else {
-            copy(directions = nextDirections, Some(pathDirection), numOfChangesInDirection + 1)
+            numOfChangesInDirection + 1
           }
+        }
+
+        previous match {
+          case None => 0
+          case Some(p) =>
+            md match {
+              case MoveRight =>
+                nextDirectionChange(square.column, p.column)
+              case MoveDown =>
+                nextDirectionChange(square.row, p.row)
+            }
+        }
       }
+      Path(nextSquare, nextPrevious, nextNumOfChangesInDirection)
     }
 
-    def turnRight: Path = turn(MoveRight)
+    def moveRight: Path = move(MoveRight)
 
-    def turnDown: Path = turn(MoveDown)
-
+    def moveDown: Path = move(MoveDown)
 
   }
 
   def calculateNumOfPaths(rows: Int, columns: Int, maxNumOfTurns: Int): Int = {
 
-    def nextMove(path: Path, direction: PathDirection): Option[Path] = {
-      direction match {
-        case MoveRight =>
-          Some(path.turnRight)
-        case MoveDown =>
-          Some(path.turnDown)
-      }
-    }
-
     def findValidPaths(row: Int, column: Int, paths: List[Path]): List[Path] = {
 
-      def move(direction: PathDirection): List[Path] = {
-        val nextPaths =
-          paths.flatMap{ path =>
-
-            def move: Option[Path] = nextMove(path, direction)
-
-            path.lastDirectionChange match {
-              case None =>
-                move
-              case Some(ldc) =>
-                if ( ldc == direction ) {
-                  move
-                } else {
-                  if ( path.numOfChangesInDirection < maxNumOfTurns) {
-                    move
-                  } else {
-                    None
-                  }
-                }
+      def movePathsRight: List[Path] = {
+        val nextPaths = paths
+          .flatMap{ path =>
+            val nextPath = path.moveRight
+            if (nextPath.numOfChangesInDirection > maxNumOfTurns ) {
+              None
+            } else {
+              Some(nextPath)
             }
-
           }
-        if (nextPaths.isEmpty) {
-          Nil
-        } else {
-          val nextRow = if ( direction == MoveDown ) row + 1 else row
-          val nextColumn = if ( direction == MoveRight ) column + 1 else column
-          findValidPaths(nextRow, nextColumn, nextPaths)
-        }
+        findValidPaths(row, column + 1, nextPaths)
       }
 
-      def moveRight: List[Path] = move(MoveRight)
-
-      def moveDown: List[Path] = move(MoveDown)
+      def movePathsDown: List[Path] = {
+        val nextPaths = paths
+          .flatMap{ path =>
+            val nextPath = path.moveDown
+            if (nextPath.numOfChangesInDirection > maxNumOfTurns ) {
+              None
+            } else {
+              Some(nextPath)
+            }
+          }
+        findValidPaths(row + 1, column, nextPaths)
+      }
 
       if ( row == rows && column == columns ) {
         paths
       } else if ( row == rows ) {
-        moveRight
+        movePathsRight
       } else if ( column == columns) {
-        moveDown
+        movePathsDown
       } else {
-        moveRight ++ moveDown
+        movePathsRight ++ movePathsDown
       }
     }
 
-    val validPaths = findValidPaths(1, 1, List(Path(Nil, None, 0)))
+    val validPaths = findValidPaths(1, 1, List(Path(Square(1, 1), None, 0)))
 
     val result = validPaths.size
 
