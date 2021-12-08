@@ -87,9 +87,9 @@ object DicePath {
 
     case class MnKey(mDown: Int, nRight: Int) {
 
-      def nextRight: MnKey = copy(nRight = nRight -1)
+      def nextRight: MnKey = copy(nRight = nRight - 1)
 
-      def nextDown: MnKey = copy(mDown = mDown -1)
+      def nextDown: MnKey = copy(mDown = mDown - 1)
 
     }
 
