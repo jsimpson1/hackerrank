@@ -4,6 +4,10 @@ import scala.collection.mutable
 
 object SherlockAndTheMaze {
 
+  val cache: mutable.HashMap[PathKey, Set[Path]] = mutable.HashMap[PathKey, Set[Path]](
+    (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
+  )
+
   case class GridSquare(row: Int, column: Int) {
     def nextRight: GridSquare = copy(column = column + 1)
     def nextDown: GridSquare = copy(row = row + 1)
@@ -94,7 +98,6 @@ object SherlockAndTheMaze {
     maxRow: Int,
     maxColumn: Int,
     maxNumOfTurns: Int,
-    cache: mutable.HashMap[PathKey, Set[Path]]
   ): Set[Path] = {
 
     val initialPath = Set(Path(List(GridSquare(1,1)), 0))
@@ -117,7 +120,7 @@ object SherlockAndTheMaze {
     result
   }
 
-  def solveLine(inputLine: String, cache: mutable.HashMap[PathKey, Set[Path]]): Int = {
+  def solveLine(inputLine: String): Int = {
 
     val nmk = inputLine.split(" ").map(_.toInt)
 
@@ -125,7 +128,7 @@ object SherlockAndTheMaze {
     val columns = nmk(1)
     val maxNumOfTurns = nmk(2)
 
-    val numOfWays = calculateNumOfPaths(rows, columns, maxNumOfTurns, cache)
+    val numOfWays = calculateNumOfPaths(rows, columns, maxNumOfTurns)
 
     val result = numOfWays.size
     
@@ -133,33 +136,23 @@ object SherlockAndTheMaze {
   }
 
   def solve(inputStr: String): Unit = {
-
-    val cache: mutable.HashMap[PathKey, Set[Path]] = mutable.HashMap[PathKey, Set[Path]](
-      (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
-    )
-
     inputStr
       .split("\n")
       .tail
       .map(line =>
-        solveLine(line, cache)
+        solveLine(line)
       ).foreach(
         println
       )
   }
 
   def solve(): Unit = {
-
-    val cache: mutable.HashMap[PathKey, Set[Path]] = mutable.HashMap[PathKey, Set[Path]](
-      (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
-    )
-
     val numOfCases = readInt
     List
       .range(0, numOfCases)
       .foreach{ _ =>
         val line = readLine
-        println(solveLine(line, cache))
+        println(solveLine(line))
       }
   }
 
