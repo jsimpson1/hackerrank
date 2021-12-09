@@ -2,16 +2,24 @@ package hackerrank.functionalprogramming.memoizationanddp
 
 import hackerrank.functionalprogramming.FileTestCase.MemoizationAndDpTestFiles
 import hackerrank.functionalprogramming.TestLoggingCapture._
+import hackerrank.functionalprogramming.memoizationanddp.SherlockAndTheMaze.{GridSquare, Path, PathKey}
 import org.scalatest.funsuite.AnyFunSuite
 
+import scala.collection.mutable
+
 class SherlockAndTheMazeTest extends AnyFunSuite {
+
+  val cache: mutable.HashMap[PathKey, Set[Path]] =
+    mutable.HashMap[PathKey, Set[Path]](
+      (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
+    )
 
   test("1 1 0") {
 
     val inputStr = "1 1 0"
 
     val expected = 1
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -20,7 +28,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "4 1 0"
 
     val expected = 1
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -29,7 +37,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "1 4 0"
 
     val expected = 1
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -39,7 +47,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "2 2 3"
 
     val expected = 2
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -49,7 +57,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "2 3 1"
 
     val expected = 2
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -59,7 +67,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "4 4 4"
 
     val expected = 18
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }
@@ -69,7 +77,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     val inputStr = "2 38 27"
 
     val expected = 38
-    val actual = SherlockAndTheMaze.solveLine(inputStr)
+    val actual = SherlockAndTheMaze.solveLine(inputStr, cache)
 
     assert(actual == expected)
   }

@@ -1,12 +1,12 @@
 package hackerrank.functionalprogramming.memoizationanddp
 
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 object SherlockAndTheMaze {
 
   case class GridSquare(row: Int, column: Int) {
-    def nextLeft: GridSquare = copy(column = column - 1)
-    def nextUp: GridSquare = copy(row = row - 1)
+    def nextRight: GridSquare = copy(column = column + 1)
+    def nextDown: GridSquare = copy(row = row + 1)
   }
 
   case class Path(
@@ -16,23 +16,23 @@ object SherlockAndTheMaze {
 
     def currentSquare: GridSquare = squares.head
 
-    private def moveTo(nextSquare: GridSquare): Path = {
+    private def isInSameDirection(square: SherlockAndTheMaze.GridSquare): Boolean = {
 
-      def isInSameDirection(square: SherlockAndTheMaze.GridSquare): Boolean = {
-
-        squares match {
-          case _ :: Nil =>
-            true
-          case cs :: ps :: _ =>
-            val movingLeft = cs.row == ps.row
-            if ( movingLeft ) {
-              square.row == currentSquare.row
-            } else {
-              square.column == currentSquare.column
-            }
-        }
-
+      squares match {
+        case _ :: Nil =>
+          true
+        case cs :: ps :: _ =>
+          val movingLeft = cs.row == ps.row
+          if ( movingLeft ) {
+            square.row == currentSquare.row
+          } else {
+            square.column == currentSquare.column
+          }
       }
+
+    }
+
+    private def moveTo(nextSquare: GridSquare): Path = {
 
       val isSameDirection = isInSameDirection(nextSquare)
 
@@ -48,84 +48,76 @@ object SherlockAndTheMaze {
       Path(nextSquares, nextNumOfChangesInDirection)
     }
 
-    def moveLeft: Path = {
-      val nextSquare = currentSquare.nextLeft
+    def moveRight: Path = {
+      val nextSquare = currentSquare.nextRight
       moveTo(nextSquare)
     }
 
-    def moveUp: Path = {
-      val nextSquare = currentSquare.nextUp
+    def moveDown: Path = {
+      val nextSquare = currentSquare.nextDown
       moveTo(nextSquare)
     }
 
   }
 
-  val topLeft: GridSquare = GridSquare(1,1)
+  case class PathKey(row: Int, column: Int, numOfTurns: Int) {
+    def nextRight: PathKey = copy(column = column + 1)
+    def nextDown: PathKey = copy(row = row + 1)
+  }
 
   def findValidPaths(
-    key: GridSquare,
-    numOfTurns: Int,
+    key: PathKey,
+    maxRow: Int,
+    maxColumn: Int,
     paths: Set[Path]
   ): Set[Path] = {
 
-    lazy val nextLeftPaths =
-      paths
-        .flatMap{ path =>
-          val nextPath = path.moveLeft
-          if ( nextPath.numOfChangesInDirection > numOfTurns) {
-            None
-          } else {
-            Some(nextPath)
-          }
-        }
+    lazy val moveDown = findValidPaths(key.nextDown, maxRow, maxColumn, paths.map(_.moveDown))
 
-    lazy val nextUpPaths =
-      paths
-        .flatMap{ path =>
-          val nextPath = path.moveUp
-          if (nextPath.numOfChangesInDirection > numOfTurns) {
-            None
-          } else {
-            Some(nextPath)
-          }
-        }
+    lazy val moveRight = findValidPaths(key.nextRight, maxRow, maxColumn, paths.map(_.moveRight))
 
-    lazy val moveLeft = findValidPaths(key.nextLeft, numOfTurns, nextLeftPaths)
-
-    lazy val moveUp = findValidPaths(key.nextUp,numOfTurns, nextUpPaths)
-
-    if ( key == topLeft ) {
-      paths
-    } else if ( key.column == 1 ){
-      val nextPaths = moveUp
-      nextPaths
-    } else if ( key.row == 1 ){
-      val nextPaths = moveLeft
-      nextPaths
+    if ( key.row == maxRow ) {
+      if ( key.column == maxColumn) {
+        paths
+      } else {
+        moveRight
+      }
+    } else if (key.column == maxColumn ) {
+        moveDown
     } else {
-      val nextPaths = moveUp ++ moveLeft
-      nextPaths
+      moveRight ++ moveDown
     }
 
   }
 
   def calculateNumOfPaths(
-    startingPoint: GridSquare,
-    numOfTurns: Int
+    maxRow: Int,
+    maxColumn: Int,
+    maxNumOfTurns: Int,
+    cache: mutable.HashMap[PathKey, Set[Path]]
   ): Set[Path] = {
 
-    val singleSquarePath = Set(Path(List(topLeft), 0))
+    val initialPath = Set(Path(List(GridSquare(1,1)), 0))
 
-    val cache: mutable.HashMap[GridSquare, Set[Path]] = mutable.HashMap[GridSquare, Set[Path]](
-      (topLeft, singleSquarePath),
-    )
+    val validPaths: Set[Path] = {
+      if ( maxRow == 1 && maxColumn == 1) {
+        Set(Path(List(GridSquare(1, 1)), 0))
+      } else {
+        val turns = (0 to maxNumOfTurns)
+        turns
+          .foldLeft(Set[Path]()) { (acc, numOfTurn) =>
+           val paths = findValidPaths(PathKey(1, 1, numOfTurn), maxRow, maxColumn, initialPath)
+            acc ++ paths
+          }
+      }
 
-    val validPaths = findValidPaths(startingPoint, numOfTurns, Set(Path(List(startingPoint), 0)))
+    }
 
-    validPaths
+    val result = validPaths.filter(_.numOfChangesInDirection <= maxNumOfTurns)
+    result
   }
 
-  def solveLine(inputLine: String): Int = {
+  def solveLine(inputLine: String, cache: mutable.HashMap[PathKey, Set[Path]]): Int = {
 
     val nmk = inputLine.split(" ").map(_.toInt)
 
@@ -133,12 +125,7 @@ object SherlockAndTheMaze {
     val columns = nmk(1)
     val maxNumOfTurns = nmk(2)
 
-
-    val numOfWays =
-      (0 to maxNumOfTurns).foldLeft(Set[Path]()) { (acc, numOfTurns) =>
-        val nextPaths = calculateNumOfPaths(GridSquare(rows,columns), numOfTurns)
-        acc ++ nextPaths
-      }
+    val numOfWays = calculateNumOfPaths(rows, columns, maxNumOfTurns, cache)
 
     val result = numOfWays.size
     
@@ -146,23 +133,33 @@ object SherlockAndTheMaze {
   }
 
   def solve(inputStr: String): Unit = {
+
+    val cache: mutable.HashMap[PathKey, Set[Path]] = mutable.HashMap[PathKey, Set[Path]](
+      (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
+    )
+
     inputStr
       .split("\n")
       .tail
       .map(line =>
-        solveLine(line)
+        solveLine(line, cache)
       ).foreach(
         println
       )
   }
 
   def solve(): Unit = {
+
+    val cache: mutable.HashMap[PathKey, Set[Path]] = mutable.HashMap[PathKey, Set[Path]](
+      (PathKey(1,1,0), Set(Path(List(GridSquare(1,1)), 0))),
+    )
+
     val numOfCases = readInt
     List
       .range(0, numOfCases)
       .foreach{ _ =>
         val line = readLine
-        println(solveLine(line))
+        println(solveLine(line, cache))
       }
   }
 

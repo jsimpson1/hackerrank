@@ -18,4 +18,10 @@ object Demo extends App {
 
   println(cache)
 
+  val key0 = GridSquare(2,2)
+
+  cache(key0) = Set()
+
+  println(cache)
+
 }
