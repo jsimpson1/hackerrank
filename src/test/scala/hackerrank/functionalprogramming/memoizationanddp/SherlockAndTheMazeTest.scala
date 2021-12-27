@@ -82,7 +82,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     assert(actual == expected)
   }
 
-  test("case0") {
+  test("case 0") {
 
     val inputStr = """3
                      |2 2 3
@@ -98,7 +98,7 @@ class SherlockAndTheMazeTest extends AnyFunSuite {
     assert(actual == expected)
   }
 
-  ignore("case 1") {
+  test("case 1") {
 
     val inputStr = MemoizationAndDpTestFiles.fileContents("SherlockAndTheMazeCase1.txt")
 

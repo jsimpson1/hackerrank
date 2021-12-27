@@ -65,31 +65,44 @@ object SherlockAndTheMaze {
   }
 
   case class PathKey(row: Int, column: Int, numOfTurns: Int) {
+
     def nextRight: PathKey = copy(column = column + 1)
     def nextDown: PathKey = copy(row = row + 1)
+
+    def isColumnMatch(other: PathKey): Boolean =
+      other.column == column
+
+    def isRowMatch(other: PathKey): Boolean =
+      other.row == row
+
+    def isRowAndColumnMatch(target: PathKey): Boolean =
+      isColumnMatch(target) && isRowMatch(target)
+
+
   }
 
   def findValidPaths(
     key: PathKey,
-    maxRow: Int,
-    maxColumn: Int,
+    target: PathKey,
     paths: Set[Path]
   ): Set[Path] = {
 
-    lazy val moveDown = findValidPaths(key.nextDown, maxRow, maxColumn, paths.map(_.moveDown))
+    lazy val moveDown = findValidPaths(key.nextDown, target, paths.map(_.moveDown))
 
-    lazy val moveRight = findValidPaths(key.nextRight, maxRow, maxColumn, paths.map(_.moveRight))
+    lazy val moveRight = findValidPaths(key.nextRight, target, paths.map(_.moveRight))
 
-    if ( key.row == maxRow ) {
-      if ( key.column == maxColumn) {
-        paths
-      } else {
-        moveRight
-      }
-    } else if (key.column == maxColumn ) {
-        moveDown
+    if ( key.isRowAndColumnMatch(target) ) {
+      cache(key) = paths
+      cache(key)
+    } else if ( key.isRowMatch(target) ) {
+      cache(key) = moveRight
+      cache(key)
+    } else if (key.isColumnMatch(target) ) {
+      cache(key) = moveDown
+      cache(key)
     } else {
-      moveRight ++ moveDown
+      cache(key) = moveRight ++ moveDown
+      cache(key)
     }
 
   }
@@ -102,6 +115,8 @@ object SherlockAndTheMaze {
 
     val initialPath = Set(Path(List(GridSquare(1,1)), 0))
 
+    lazy val targetKeyPath = PathKey(maxRow, maxColumn, maxNumOfTurns)
+
     val validPaths: Set[Path] = {
       if ( maxRow == 1 && maxColumn == 1) {
         Set(Path(List(GridSquare(1, 1)), 0))
@@ -109,7 +124,7 @@ object SherlockAndTheMaze {
         val turns = (0 to maxNumOfTurns)
         turns
           .foldLeft(Set[Path]()) { (acc, numOfTurn) =>
-           val paths = findValidPaths(PathKey(1, 1, numOfTurn), maxRow, maxColumn, initialPath)
+           val paths = findValidPaths(PathKey(1, 1, numOfTurn), targetKeyPath, initialPath)
             acc ++ paths
           }
       }
